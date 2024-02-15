@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VFR Flight Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+    <link rel="stylesheet" href="style.css"/>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/@mapbox/togeojson"></script>
+    <script src="map.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="header">
+        <button id="wxButton">WX</button>
+        <button>TMA FIX</button>
+        <button id="vfrFixButton">VFR FIX</button>
+        <button>RWY</button>
+    </div>
+    <div id="map"></div>
+    <div id="content">
+        <!-- Your content goes here -->
+        <h2 id="activeAirport" style="margin-bottom: 0; text-align: center;">EFTP - Tampere-Pirkkala</h2>
+
+        <div id="airportDataContainer">
+            <h3>METAR</h3>
+            <p>METAR EFTP 151720Z AUTO 13005KT 9999 OVC004 M01/M02 Q1021=</p>
+            <h3>ATIS B Q1021</h3>
+            <p>EFTP ARR AND DEP INFO B <br>1720 <br>ILS Z APCH EXPECTED <br>RWY 24 IN USE<br>DEP TFC CONTACT TWR 118.7<br>RUNWAY 06 CONDITION REPORT AT 1442 UTC<br>RUNWAY CONDITION CODES 4 DOWNGRADED, 4 DOWNGRADED, 4 DOWNGRADED<br>CONTAMINANTS ALL PARTS 100 PERCENT 03 MILLIMETERS DRY SNOW<br>TAKEOFF SIGNIFICANT CONTAMINANT THIN<br>REDUCED WIDTH 40 METERS<br>DRIFTING SNOW.<br>TRL 60<br>AUTO<br>WIND TDZ 130 DEG 05 KT<br>VIS 10KM OVC 004<br>T M01 DP M02 QNH 1021<br>ACK INFO B</p>
+            <h3>NOTAMs</h3>
+            <p>LONG-TERM PARKING FOR AIRCRAFT OF GENERAL AVIATION BELOW 2000 MTOW LIMITED TO APN 1 AND APN 2<br><span>FROM: 29NOV23 1300  TO: 30APR24 1200 (A5044/23)</span><br><br>RWY06/24 POSSIBLE CRACKS AND LOOSE STONES<br><span>FROM: 12FEB24 1400  TO: 03MAR24 1200 (A0369/24)</span></p>
+    
+            <table id="airportInformationTable">
+                <tr>
+                    <th>Departure and Arrival Charts</th>
+                </tr>
+                <tr>
+                    <td>SID RWY 06</td>
+                </tr>
+                <tr>
+                    <td>SID RWY 24</td>
+                </tr>
+                <tr>
+                    <td>STAR RWY 06</td>
+                </tr>
+                <tr>
+                    <td>STAR RWY 24</td>
+                </tr>
+                <tr>
+                    <th>Instrument Approach Charts</th>
+                </tr>
+                <tr>
+                    <td>RNP RWY 06</td>
+                </tr>
+                <tr>
+                    <td>ILS Z or LOC Z RWY 24</td>
+                </tr>
+                <tr>
+                    <th>Other</th>
+                </tr>
+                <tr>
+                    <td>VISUAL APPROACH CHART</td>
+                </tr>
+                <tr>
+                    <td>LOCAL TRAINING AREAS</td>
+                </tr>
+                <tr>
+                    <td>FINNHEMS 30 LOP</td>
+                </tr>
+                <tr>
+                    <td>MILITARY RTF</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>
