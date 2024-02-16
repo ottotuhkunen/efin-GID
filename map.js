@@ -1,4 +1,5 @@
 var map;
+let geojsonLayer; 
 
 // EFJY CTA
 const now = new Date();
@@ -50,7 +51,7 @@ async function addKMLToMap(map) {
         };
 
         // Add the GeoJSON layer with adjusted styling for active KML names
-        L.geoJson(filteredGeoJSON, {
+        geojsonLayer = L.geoJson(filteredGeoJSON, {
             style: function(feature) {
                 var styleId = feature.properties.styleUrl ? feature.properties.styleUrl.replace('#', '') : null;
                 var baseStyle = styleId && kmlStyles[styleId] ? {
@@ -231,48 +232,18 @@ const kmlStyles = {
     }
 };
 
-
-/*
-var southWestLat = 59.0;
-var southWestLng = 20.0;
-var northEastLat = 70.0;
-var northEastLng = 31.0;
-
-// Specify the geographical bounds of the SVG overlay
-var bounds = L.latLngBounds([[southWestLat, southWestLng], [northEastLat, northEastLng]]);
-
-// Create the SVG overlay but don't add it to the map yet
-var svgOverlay = L.imageOverlay('src/eftp.svg', bounds);
-
-// Listen for zoom events on the map to control the visibility of the SVG overlay
-map.on('zoomend', function() {
-    var currentZoom = map.getZoom();
-    
-    // Adjust '10' to the minimum zoom level you want the SVG to be visible at
-    if (currentZoom >= 10) {
-        if (!map.hasLayer(svgOverlay)) {
-            svgOverlay.addTo(map);
-        }
-    } else {
-        if (map.hasLayer(svgOverlay)) {
-            map.removeLayer(svgOverlay);
-        }
-    }
-});
-*/
-
-// fixes
+// FIXES
 
 document.addEventListener('DOMContentLoaded', function() {
+    var accSectorLayer = L.layerGroup();
 
-    // Triangle SVG icon as a Data URL
+    // Triangle icon
     var triangleIconUrl = 'data:image/svg+xml;base64,' + btoa(`
         <svg width="10" height="10" viewbox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
             <path d="M 5 0 L 10 10 L 0 10 Z" fill="black" />
         </svg>
     `);
 
-    // Function to create a triangle marker
     function createTriangleMarker(point) {
         // Convert DMS coordinates to decimal
         var coords = convertToLatLng(point.dmsCoords[0], point.dmsCoords[1]);
@@ -306,12 +277,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
         return marker;
     }
-    
 
-    // Layer group to hold the triangle markers
     var vfrLayer = L.layerGroup(vfrPoints.map(createTriangleMarker));
 
-    // Add toggle functionality
+    // toggle functionality
     var vfrFixButton = document.getElementById('vfrFixButton');
     vfrFixButton.addEventListener('click', function() {
         if (map.hasLayer(vfrLayer)) {
@@ -321,9 +290,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Ensure the layer is not displayed by default
     vfrLayer.removeFrom(map);
-
     var minimumZoomForLabels = 8;
 
     // Function to set tooltip opacity based on the zoom level
@@ -343,9 +310,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     setTooltipVisibility(map.getZoom());
     
-    // testing weather layer
+    // WEATHER
     // https://en.ilmatieteenlaitos.fi/open-data-manual-fmi-wms-services
-    
     var radarLayer = L.tileLayer.wms('https://openwms.fmi.fi/geoserver/wms', {
         layers: 'Radar:suomi_rr_eureffin',
         format: 'image/png',
@@ -354,6 +320,8 @@ document.addEventListener('DOMContentLoaded', function() {
         _uniqueTime: new Date().getTime()
     }).addTo(map);
 
+
+    // BUTTON MAPPING
     document.getElementById('wxButton').addEventListener('click', function() {
         if (map.hasLayer(radarLayer)) {
             map.removeLayer(radarLayer);
@@ -361,6 +329,51 @@ document.addEventListener('DOMContentLoaded', function() {
             map.addLayer(radarLayer);
         }
     });
+
+     // add FIR to map
+     firCoordinates.forEach(sector => {
+        const polyline = L.polyline(sector, {
+            color: "black",
+            weight: 1
+        });
+        map.addLayer(polyline);
+    });
+
+    // add ACC Sectors to map
+    sectorCoordinates.forEach(sector => {
+        const polyline = L.polyline(sector, {
+            color: '#476c00',
+            dashArray: '10 5 5 5',
+            weight: 1
+        });
+        accSectorLayer.addLayer(polyline);
+    });
+
+    // ACC Sectors button
+    document.getElementById('loadAccSectors').addEventListener('click', () => {
+        if (map.hasLayer(accSectorLayer)) {
+            map.removeLayer(accSectorLayer);
+        } else {
+            map.addLayer(accSectorLayer);
+        }
+    });
+
+
+    // other airspaces (CTR, TMA and FIZ) toggle button
+    function toggleAirspace() {
+        if (map.hasLayer(geojsonLayer)) {
+            map.removeLayer(geojsonLayer);
+        } else {
+            geojsonLayer.addTo(map);
+        }
+    }
+    document.getElementById('airspaceButton').addEventListener('click', toggleAirspace);
+
+        
+    
+
+
+
 
 });
 
