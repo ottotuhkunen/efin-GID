@@ -1,46 +1,74 @@
 var map;
 
+// EFJY CTA
+const now = new Date();
+const dayOfWeek = now.getUTCDay(); // 0 (Sunday) to 6 (Saturday)
+const utcHours = now.getUTCHours();
+const excludeStyleIds = ['RAS', 'airfield', 'aerodrome', 'heliport', 'Other'];
+const isVisibleEFJYCTA = ((dayOfWeek >= 1 && dayOfWeek <= 4 && utcHours >= 6 && utcHours < 14) || (dayOfWeek === 5 && utcHours >= 6 && utcHours < 12)); 
+// MON-THU 0600-1400 UTC 
+// FRI 0600-1200 UTC
+
 // Function to fetch KML, convert it to GeoJSON, and add it to the map
-function addKMLToMap(map) {
-    fetch('https://flyk.com/api/finland.kml')
-        .then(response => response.text())
-        .then(kmlText => {
-            var parser = new DOMParser();
-            var kml = parser.parseFromString(kmlText, 'text/xml');
-            var convertedGeoJSON = toGeoJSON.kml(kml);
+async function addKMLToMap(map) {
+    try {
+        // Await the fetching and processing of VATSIM data to ensure activeKmlNames is ready
+        const vatsimResponse = await fetch('https://data.vatsim.net/v3/vatsim-data.json');
+        const vatsimData = await vatsimResponse.json();
+        const activeAtcCodes = vatsimData.controllers.map(controller => controller.callsign);
+        
 
-            // Define an array of style IDs to exclude
-            const excludeStyleIds = ['RAS', 'airfield', 'aerodrome', 'heliport', 'Other'];
+        activeKmlNames = [];
+        
+        atcToKmlMapping.forEach(mapping => {
+            const [atcCodes, kmlNames] = mapping;
+            // Check if any ATC code in this entry is active
+            const isActive = atcCodes.some(atcCode => 
+                activeAtcCodes.some(activeCode => activeCode.startsWith(atcCode))
+            );
 
-            // Filter GeoJSON features based on their styleUrl
-            var filteredGeoJSON = {
-                ...convertedGeoJSON,
-                features: convertedGeoJSON.features.filter(feature => {
-                    // Extract style ID from feature's properties, assuming it's stored as 'styleUrl'
-                    var styleId = feature.properties.styleUrl ? feature.properties.styleUrl.replace('#', '') : null;
-                    // Include the feature if its style ID is not in the exclude list
-                    return !excludeStyleIds.includes(styleId);
-                })
-            };
+            if (isActive) {
+                // If any ATC code is active, mark all corresponding KML names as active
+                activeKmlNames.push(...kmlNames);
+            }
+        });
 
-            // Add the filtered GeoJSON to the map with dynamic styling
-            L.geoJson(filteredGeoJSON, {
-                style: function(feature) {
-                    var styleId = feature.properties.styleUrl ? feature.properties.styleUrl.replace('#', '') : null;
-                    if (styleId && kmlStyles[styleId]) {
-                        return {
-                            color: kmlStyles[styleId].color,
-                            fillColor: kmlStyles[styleId].fillColor,
-                            weight: kmlStyles[styleId].weight,
-                            fillOpacity: kmlStyles[styleId].fillOpacity
-                        };
-                    }
-                    // Default style if no matching styleId found
-                    return { color: "white", weight: 0, opacity: 0, fillOpacity: 0 };
+        // Now fetch and process the KML data
+        const kmlResponse = await fetch('https://flyk.com/api/finland.kml');
+        const kmlText = await kmlResponse.text();
+        const parser = new DOMParser();
+        const kml = parser.parseFromString(kmlText, 'text/xml');
+        const convertedGeoJSON = toGeoJSON.kml(kml);
+
+        // Filter and add GeoJSON as before
+        const filteredGeoJSON = {
+            ...convertedGeoJSON,
+            features: convertedGeoJSON.features.filter(feature => {
+                var styleId = feature.properties.styleUrl ? feature.properties.styleUrl.replace('#', '') : null;
+                return !excludeStyleIds.includes(styleId) && !(feature.properties.name === "EFJY CTA" && !isVisibleEFJYCTA);
+            })
+        };
+
+        // Add the GeoJSON layer with adjusted styling for active KML names
+        L.geoJson(filteredGeoJSON, {
+            style: function(feature) {
+                var styleId = feature.properties.styleUrl ? feature.properties.styleUrl.replace('#', '') : null;
+                var baseStyle = styleId && kmlStyles[styleId] ? {
+                    ...kmlStyles[styleId]
+                } : { color: "white", weight: 0, opacity: 0, fillOpacity: 0 };
+
+                // If the feature's name is in the activeKmlNames list, adjust the style
+                if (feature.properties.name && activeKmlNames.includes(feature.properties.name)) {
+                    baseStyle.weight = 2.5; // Adjust the weight for highlighted features
                 }
-            }).addTo(map);
-        })
-        .catch(error => console.error('Error fetching or converting KML:', error));
+
+                return baseStyle;
+            }
+        }).addTo(map);
+
+    } catch (error) {
+        console.error('Error fetching or processing data:', error);
+    }
 
         var airports = [
             { name: "Enontekiö", icao: "EFET", coords: [68.3625, 23.4244] },
@@ -72,8 +100,8 @@ function addKMLToMap(map) {
         
         airports.forEach(function(airport) {
             var circle = L.circleMarker(airport.coords, {
-                radius: 3,
-                fillColor: "#ff7800",
+                radius: 4,
+                fillColor: "coral",
                 color: "#000",
                 weight: 1,
                 opacity: 1,
@@ -83,8 +111,8 @@ function addKMLToMap(map) {
             circle.bindTooltip(airport.icao, {
                 permanent: false,
                 className: 'custom-tooltip',
-                direction: 'bottom',
-                offset: L.point(10, -10)
+                direction: 'top',
+                offset: L.point(10, 5)
             });
         });
 }
@@ -114,55 +142,70 @@ document.addEventListener('DOMContentLoaded', (event) => {
         east: 31.59
     };
 
-    // Fetch VATSIM data
-    fetch('https://data.vatsim.net/v3/vatsim-data.json')
-    .then(response => response.json())
-    .then(data => {
-        data.pilots.forEach(pilot => {
-            const isInFinland = pilot.latitude <= finlandBounds.north && pilot.latitude >= finlandBounds.south &&
-                    pilot.longitude >= finlandBounds.west && pilot.longitude <= finlandBounds.east;
-        
-            // show all aircraft arriving in Finland no matter where they are
-            const isArrivingInFinland = pilot.flight_plan && pilot.flight_plan.arrival.startsWith("EF");
+    var aircraftMarkers = L.layerGroup().addTo(map);
 
-            if (isInFinland || isArrivingInFinland) {
+    // Step 2: Define the function to fetch and update aircraft positions
+    function fetchAndUpdateAircraftPositions() {
+        // Clear existing markers from the map
+        aircraftMarkers.clearLayers();
+        console.log("Aircraft positions updated");
 
-                var afl = pilot.altitude;
-                var spd = pilot.groundspeed;
+        // Fetch VATSIM data
+        fetch('https://data.vatsim.net/v3/vatsim-data.json')
+        .then(response => response.json())
+        .then(data => {
+            data.pilots.forEach(pilot => {
+                const isInFinland = pilot.latitude <= finlandBounds.north && pilot.latitude >= finlandBounds.south &&
+                        pilot.longitude >= finlandBounds.west && pilot.longitude <= finlandBounds.east;
+            
+                // show all aircraft arriving in Finland no matter where they are
+                const isArrivingInFinland = pilot.flight_plan && pilot.flight_plan.arrival.startsWith("EF");
 
-                if (afl <= 5000 && afl > 300) afl = 'A' + Math.floor(afl / 100).toString().padStart(2, '0');
-                else if (afl < 300) afl = '';
-                else if (afl > 5000) afl = 'F' + Math.floor(afl / 100).toString().padStart(2, '0');
+                if (isInFinland || isArrivingInFinland) {
 
-                if (spd < 30) spd = '';
+                    var afl = pilot.altitude;
+                    var spd = pilot.groundspeed;
 
-                var htmlContent = `
-                    <div class="custom-marker">
-                    <div class="heading-line" style="transform: rotate(${pilot.heading - 90}deg);"></div>
-                    <div class="marker-square"></div>
-                    <div class="marker-text">
-                        <span class="always-visible">${pilot.callsign}</span>
-                        <span class="on-hover-content">
-                            ${pilot.flight_plan ? pilot.flight_plan.aircraft_short : ''}<br>
-                            ${afl} ${spd} ${pilot.flight_plan.arrival}
-                        </span>
-                    </div>
-                    </div>
-                `;
+                    if (afl <= 5000 && afl > 300) afl = 'A' + Math.floor(afl / 100).toString().padStart(2, '0');
+                    else if (afl < 300) afl = '';
+                    else if (afl > 5000) afl = 'F' + Math.floor(afl / 100).toString().padStart(2, '0');
 
-                var marker = L.divIcon({
-                    className: 'custom-div-icon',
-                    html: htmlContent,
-                    iconSize: [60, 30], // Adjust based on your content
-                    iconAnchor: [2, 2], // Adjust to properly position the icon
-                });
+                    if (spd < 30) spd = '';
 
-                L.marker([pilot.latitude, pilot.longitude], { icon: marker }).addTo(map);
-            }
-        });
-    })
-    .catch(error => console.error('Error fetching VATSIM data:', error));
+                    var htmlContent = `
+                        <div class="custom-marker">
+                        <div class="heading-line" style="transform: rotate(${pilot.heading - 90}deg);"></div>
+                        <div class="marker-square"></div>
+                        <div class="marker-text">
+                            <span class="always-visible">${pilot.callsign}</span>
+                            <span class="on-hover-content">
+                            ${pilot.flight_plan ? (pilot.flight_plan.aircraft_short ? pilot.flight_plan.aircraft_short : 'XXXX') : 'XXXX'}<br>
+                            ${afl} ${spd} ${pilot.flight_plan ? (pilot.flight_plan.arrival ? pilot.flight_plan.arrival : 'XXXX') : 'XXXX'}
+                            </span>
+                        </div>
+                        </div>
+                    `;
+
+                    var marker = L.divIcon({
+                        className: 'custom-div-icon',
+                        html: htmlContent,
+                        iconSize: [60, 30], // Adjust based on your content
+                        iconAnchor: [2, 2], // Adjust to properly position the icon
+                    });
+
+                    L.marker([pilot.latitude, pilot.longitude], { icon: marker }).addTo(aircraftMarkers); // Corrected line
+
+                }
+            });
+        })
+        .catch(error => console.error('Error fetching VATSIM data:', error));
+    }
+
+    fetchAndUpdateAircraftPositions();
+    setInterval(fetchAndUpdateAircraftPositions, 30000); 
 });
+
+
 
 const kmlStyles = {
     "G": { color: "rgba(69, 130, 181, 0.6)", fillOpacity: 0, weight: 1 },
@@ -221,36 +264,6 @@ map.on('zoomend', function() {
 // fixes
 
 document.addEventListener('DOMContentLoaded', function() {
-
-    var vfrPoints = [
-        // EFHK
-        { name: "HAGIP", dmsCoords: ["601231N", "0245400E"], direction: "bottom-left" },
-        { name: "LILJA", dmsCoords: ["601926N", "0251231E"], direction: "top-right" },
-        { name: "LINTU", dmsCoords: ["602247N", "0244104E"], direction: "top-left" },
-        { name: "OGELI", dmsCoords: ["601351N", "0245916E"], direction: "bottom-right" },
-        { name: "OLBIB", dmsCoords: ["602704N", "0250107E"], direction: "top-right" },
-        // EFTU
-        { name: "EVEKE", dmsCoords: ["602356N", "0223023E"], direction: "bottom-right" },
-        { name: "JUTKI", dmsCoords: ["602254N", "0220707E"], direction: "bottom-right" },
-        { name: "NOUSU", dmsCoords: ["603745N", "0220317E"], direction: "top-right" },
-        { name: "OJANE", dmsCoords: ["603905N", "0223309E"], direction: "top-right" },
-        // EFMA
-        { name: "BROON", dmsCoords: ["601307N", "0194236E"], direction: "top-left" },
-        { name: "PRAST", dmsCoords: ["601235N", "0201450E"], direction: "bottom-right" },
-        { name: "WINHA", dmsCoords: ["600420N", "0200737E"], direction: "bottom-right" },
-        // EFPO
-        { name: "MALOP", dmsCoords: ["611458N", "0215806E"], direction: "bottom-left" },
-        { name: "MORHI", dmsCoords: ["612836N", "0221158E"], direction: "top-right" },
-        { name: "OMULE", dmsCoords: ["613719N", "0214643E"], direction: "top-right" },
-        { name: "RAUTU", dmsCoords: ["612134N", "0213859E"], direction: "bottom-left" },
-        // EFTP
-        { name: "LIMPU", dmsCoords: ["611303N", "0232104E"], direction: "bottom-right" },
-        { name: "PUPPA", dmsCoords: ["613509N", "0234511E"], direction: "top-left" },
-        { name: "PURSO", dmsCoords: ["612917N", "0231934E"], direction: "top-left" },
-        { name: "ROINE", dmsCoords: ["612225N", "0240200E"], direction: "bottom-right" },
-        { name: "VIILA", dmsCoords: ["611805N", "0234303E"], direction: "bottom-right" },
-    ];    
-    
 
     // Triangle SVG icon as a Data URL
     var triangleIconUrl = 'data:image/svg+xml;base64,' + btoa(`
@@ -371,4 +384,3 @@ function convertToLatLng(dmsLat, dmsLng) {
 
     return [lat, lng];
 }
-

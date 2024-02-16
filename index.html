@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>VFR Flight Map</title>
+    <title>EFIN ACC GID</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
     <link rel="stylesheet" href="style.css"/>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://unpkg.com/@mapbox/togeojson"></script>
+    <script src="data.js"></script>
     <script src="map.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,9 +14,10 @@
 </head>
 <body>
     <div id="header">
+        <button id="trafficButton">TRAFFIC</button>
         <button id="wxButton">WX</button>
         <button>TMA FIX</button>
-        <button id="vfrFixButton">VFR FIX</button>
+        <button id="vfrFixButton">CTR FIX</button>
         <button>RWY</button>
     </div>
     <div id="map"></div>
