@@ -2,6 +2,8 @@ var map;
 let geojsonLayer; 
 let sigmetLayers = [];
 let aircraftMarkers;
+let mainLines = [];
+let crossLines = [];
 
 // EFJY CTA
 const now = new Date();
@@ -14,9 +16,7 @@ const isVisibleEFJYCTA = ((dayOfWeek >= 1 && dayOfWeek <= 4 && utcHours >= 6 && 
 
 async function addKMLToMap(map) {
     document.getElementById('airspaceButton').disabled = true;
-    if (geojsonLayer) {
-        map.removeLayer(geojsonLayer);
-    }
+    if (geojsonLayer) map.removeLayer(geojsonLayer);
 
     try {
         // Await the fetching and processing of VATSIM data to ensure activeKmlNames is ready
@@ -62,14 +62,20 @@ async function addKMLToMap(map) {
                     ...kmlStyles[styleId]
                 } : { color: "white", weight: 0, opacity: 0, fillOpacity: 0 };
 
-                // If the feature's name is in the activeKmlNames list, adjust the style
+                // If active ATC found for the airspace block
                 if (feature.properties.name && activeKmlNames.includes(feature.properties.name)) {
-                    baseStyle.weight = 2.5; // Adjust the weight for highlighted features
+                    baseStyle.weight = 2.5; // highlight controlled airspaces
                 }
 
                 return baseStyle;
+            },
+            onEachFeature: function(feature, layer) {
+                var popupContent = `
+                    ${feature.properties.name}
+                `;
+                layer.bindPopup(popupContent);
             }
-        }).addTo(map);
+        }).addTo(map).bringToBack();
 
         var airacIcon = L.divIcon({
             className: 'airacLabel',
@@ -82,30 +88,6 @@ async function addKMLToMap(map) {
     } finally {
         document.getElementById('airspaceButton').disabled = false;
     }
-
-    // make airports
-    airports.forEach(function(airport) {
-        var circle = L.circleMarker(airport.coords, {
-            radius: 4.5,
-            fillColor: "coral",
-            color: "#000",
-            weight: 1,
-            opacity: 1,
-            fillOpacity: 0.8
-        }).addTo(map);
-    
-        circle.bindTooltip(airport.icao, {
-            permanent: false,
-            className: 'custom-tooltip',
-            direction: 'top',
-            offset: L.point(10, 5)
-        });
-
-        circle.on('click', function() {
-            loadAirportData(airport.icao);
-        });
-
-    });
 
     console.log("Airspace and ATC activity loaded");    
 }
@@ -186,7 +168,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
     updateAircraftPositions();
     setInterval(updateAircraftPositions, 30000);
     
-
     // Close data window
     var closeButton = document.getElementById("closeContentWindow");
     if (closeButton) {
@@ -198,6 +179,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
         });
     }
 
+    // add ground maps (ADC - aerodrome charts)
+    addPdfOverlays();
     
     fetch('/flow')
     .then(response => response.json())
@@ -465,6 +448,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    document.getElementById('rwyButton').addEventListener('click', function() {
+        if (map.hasLayer(mainLines[0])) {
+            crossLines.forEach(crossLine => {
+                map.removeLayer(crossLine);
+            });
+            mainLines.forEach(mainLine => {
+                map.removeLayer(mainLine);
+            });
+            document.getElementById('rwyButton').style.backgroundColor = "#484b4c";
+        } else {
+            crossLines.forEach(crossLine => {
+                map.addLayer(crossLine);
+            });
+            mainLines.forEach(mainLine => {
+                map.addLayer(mainLine);
+            });
+            document.getElementById('rwyButton').style.backgroundColor = "#41826e";
+        }
+    });
+
     // add ACC Sectors to map
     sectorCoordinates.forEach(sector => {
         const polyline = L.polyline(sector, {
@@ -550,6 +553,30 @@ document.addEventListener('DOMContentLoaded', function() {
     updateTime();
     setInterval(updateTime, 1000);
 
+    // make airports
+    airports.forEach(function(airport) {
+        var circle = L.circleMarker(airport.coords, {
+            radius: 5,
+            fillColor: "coral",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map);
+    
+        circle.bindTooltip(airport.icao, {
+            permanent: false,
+            className: 'custom-tooltip',
+            direction: 'top',
+            offset: L.point(10, 5)
+        });
+
+        circle.on('click', function() {
+            loadAirportData(airport.icao);
+        });
+
+    });
+
     // make runway extended centerlines
 
     //EFTP
@@ -559,7 +586,7 @@ document.addEventListener('DOMContentLoaded', function() {
     drawExtendedCenterline(convertCoordinatesToDecimal("612803.41N 0214658.04E"), 125.77, 15, map)
     drawExtendedCenterline(convertCoordinatesToDecimal("612727.31N 0214842.74E"), 305.80, 15, map)
     // EFTU
-    drawExtendedCenterline(convertCoordinatesToDecimal("603047.19N 0221424.53E"), 084.83, 15, map)
+    drawExtendedCenterline(convertCoordinatesToDecimal("603047.19N 0221424.53E"), 84.83, 15, map)
     drawExtendedCenterline(convertCoordinatesToDecimal("603054.44N 0221707.72E"), 264.87, 15, map)
     // EFHK
     drawExtendedCenterline(convertCoordinatesToDecimal("601846.61N 0245413.93E"), 47.47, 25, map)
@@ -571,7 +598,63 @@ document.addEventListener('DOMContentLoaded', function() {
     // EFMA
     drawExtendedCenterline(convertCoordinatesToDecimal("600651.71N 0195328.92E"), 23.37, 15, map)
     drawExtendedCenterline(convertCoordinatesToDecimal("600748.15N 0195417.81E"), 203.38, 15, map)
-
+    // EFLP
+    drawExtendedCenterline(convertCoordinatesToDecimal("610224.43N 0280723.32E"), 66.72, 15, map)
+    drawExtendedCenterline(convertCoordinatesToDecimal("610256.33N 0280956.36E"), 246.76, 15, map)
+    // EFUT
+    drawExtendedCenterline(convertCoordinatesToDecimal("605340.32N 0265513.19E"), 78.03, 15, map)
+    drawExtendedCenterline(convertCoordinatesToDecimal("605353.71N 0265722.96E"), 258.06, 15, map)
+    // EFMI
+    drawExtendedCenterline(convertCoordinatesToDecimal("614119.78N 0271128.28E"), 112.59, 15, map)
+    drawExtendedCenterline(convertCoordinatesToDecimal("614102.98N 0271253.26E"), 292.61, 15, map)
+    // EFSA
+    drawExtendedCenterline(convertCoordinatesToDecimal("615656.69N 0285538.42E"), 125.66, 15, map)
+    drawExtendedCenterline(convertCoordinatesToDecimal("615613.36N 0285746.54E"), 305.69, 15, map)
+    // EFJO
+    drawExtendedCenterline(convertCoordinatesToDecimal("623952.52N 0293551.59E"), 110.30, 15, map)
+    drawExtendedCenterline(convertCoordinatesToDecimal("623924.48N 0293836.22E"), 290.34, 15, map)
+    // EFKU
+    drawExtendedCenterline(convertCoordinatesToDecimal("630105.09N 0274715.52E"), 157.17, 15, map)
+    drawExtendedCenterline(convertCoordinatesToDecimal("625941.74N 0274832.67E"), 337.19, 15, map)
+    // EFJY
+    drawExtendedCenterline(convertCoordinatesToDecimal("622427.18N 0253936.50E"), 133.93, 20, map)
+    drawExtendedCenterline(convertCoordinatesToDecimal("622328.87N 0254146.90E"), 313.96, 20, map)
+    // EFHA
+    drawExtendedCenterline(convertCoordinatesToDecimal("615118.92N 0244543.07E"), 86.08, 15, map)
+    drawExtendedCenterline(convertCoordinatesToDecimal("615124.63N 0244840.54E"), 266.13, 15, map)
+    // EFSI
+    drawExtendedCenterline(convertCoordinatesToDecimal("624149.61N 0224918.82E"), 136.18, 15, map)
+    drawExtendedCenterline(convertCoordinatesToDecimal("624103.01N 0225056.13E"), 316.20, 15, map)
+    // EFVA
+    drawExtendedCenterline(convertCoordinatesToDecimal("630343.42N 0214516.16E"), 163.16, 15, map)
+    drawExtendedCenterline(convertCoordinatesToDecimal("630226.15N 0214607.67E"), 343.17, 15, map)
+    // EFKK
+    drawExtendedCenterline(convertCoordinatesToDecimal("634228.25N 0230817.37E"), 10.64, 15, map)
+    drawExtendedCenterline(convertCoordinatesToDecimal("634347.59N 0230851.00E"), 190.65, 15, map)
+    // EFKI
+    drawExtendedCenterline(convertCoordinatesToDecimal("641700.41N 0274001.33E"), 79.58, 15, map)
+    drawExtendedCenterline(convertCoordinatesToDecimal("641714.98N 0274304.07E"), 259.63, 15, map)
+    // EFOU
+    drawExtendedCenterline(convertCoordinatesToDecimal("645609.01N 0251954.82E"), 120.98, 15, map)
+    drawExtendedCenterline(convertCoordinatesToDecimal("645527.41N 0252238.01E"), 301.02, 15, map)
+    // EFKE
+    drawExtendedCenterline(convertCoordinatesToDecimal("654734.86N 0243509.64E"), 187.52, 15, map)
+    drawExtendedCenterline(convertCoordinatesToDecimal("654614.74N 0243443.90E"), 7.51, 15, map)
+    // EFKS
+    drawExtendedCenterline(convertCoordinatesToDecimal("655941.33N 0291311.05E"), 132.18, 15, map)
+    drawExtendedCenterline(convertCoordinatesToDecimal("655847.99N 0291535.48E"), 312.21, 15, map)
+    // EFRO
+    drawExtendedCenterline(convertCoordinatesToDecimal("663314.76N 0254835.95E"), 37.17, 15, map)
+    drawExtendedCenterline(convertCoordinatesToDecimal("663431.96N 0255103.07E"), 217.21, 15, map)
+    // EFKT
+    drawExtendedCenterline(convertCoordinatesToDecimal("674242.85N 0245023.15E"), 166.10, 15, map)
+    drawExtendedCenterline(convertCoordinatesToDecimal("674124.51N 0245114.16E"), 346.12, 15, map)
+    // EFET
+    drawExtendedCenterline(convertCoordinatesToDecimal("682118.76N 0232437.79E"), 34.68, 15, map)
+    drawExtendedCenterline(convertCoordinatesToDecimal("682211.86N 0232617.37E"), 214.70, 15, map)
+    // EFIV
+    drawExtendedCenterline(convertCoordinatesToDecimal("683558.66N 0272258.40E"), 46.99, 15, map)
+    drawExtendedCenterline(convertCoordinatesToDecimal("683653.66N 0272540.02E"), 227.03, 15, map)
 });
 
 function dmsToDecimal(degrees, minutes, seconds, direction) {
@@ -657,6 +740,7 @@ function drawExtendedCenterline(startCoord, heading, distanceNM, map) {
 
     // Draw main line
     const mainLine = L.polyline([startPoint, endPoint], { color: '#8a8a8a', weight: 1 }).addTo(map);
+    mainLines.push(mainLine);
 
     // Draw cross lines at each mile
     for (let i = 0.5; i < distanceNM; i++) {
@@ -666,6 +750,8 @@ function drawExtendedCenterline(startCoord, heading, distanceNM, map) {
         const midPoint = [(milePoint[0] + nextMilePoint[0]) / 2, (milePoint[1] + nextMilePoint[1]) / 2]; // Midpoint between two consecutive miles
         const crossLineStart = calculateEndPoint(midPoint, heading + 90, crossLineLength / 60); // Perpendicular to main line
         const crossLineEnd = calculateEndPoint(midPoint, heading + 90, -crossLineLength / 60); // Perpendicular to main line
-        L.polyline([crossLineStart, crossLineEnd], { color: '#8a8a8a', weight: 1 }).addTo(map);
+        const crossLine = L.polyline([crossLineStart, crossLineEnd], { color: '#8a8a8a', weight: 1 }).addTo(map);
+
+        crossLines.push(crossLine);
     }   
 }

@@ -786,7 +786,7 @@ function aircraftData(cs) {
                 PIC ${atcFlightPlan.pic}
             `;
 
-            const skyVectorUrl = `https://skyvector.com/?ll=64.89931801424359,23.022949231465624&chart=301&zoom=11&fpl=${atcFlightPlan.departure}%20${atcFlightPlan.route}%20${atcFlightPlan.arrival}`;
+            const skyVectorUrl = `https://skyvector.com/?fpl=${atcFlightPlan.departure}%20${atcFlightPlan.route}%20${atcFlightPlan.arrival}`;
             document.getElementById("skyvectorLink").href = skyVectorUrl;
 
         } else {
@@ -794,4 +794,42 @@ function aircraftData(cs) {
         }
     })
     .catch(error => console.error('Error fetching aircraft positions:', error));
+}
+
+const pdfOverlays = [
+    {
+        url: 'src/efhk_adc.svg',
+        bounds: [[60.299800, 24.900945], [60.299800, 24.999603], [60.334343, 24.999603], [60.334343, 24.900945]]
+    },
+    {
+        url: 'src/eftp.svg',
+        bounds: [[61.402434, 23.562739], [61.402434, 23.646386], [61.430750, 23.646386], [61.430750, 23.562739]]
+    },
+    {
+        url: 'src/eftu.svg',
+        bounds: [[60.498975, 22.227712], [60.498975, 22.308875], [60.527238, 22.308875], [60.527238, 22.227712]]
+    }
+];
+
+function addPdfOverlays() {
+    pdfOverlays.forEach(overlay => {
+        const imageOverlay = L.imageOverlay(overlay.url, overlay.bounds, {
+            interactive: false
+        });
+
+        function addOverlayIfNeeded() {
+            const zoomLevel = map.getZoom();
+            const mapBounds = map.getBounds();
+            const overlayBounds = L.latLngBounds(overlay.bounds);
+
+            if (zoomLevel >= 12 && mapBounds.intersects(overlayBounds)) {
+                imageOverlay.addTo(map).bringToBack();
+            } else {
+                map.removeLayer(imageOverlay);
+            }
+        }
+
+        map.on('zoomend', addOverlayIfNeeded);
+        addOverlayIfNeeded();
+    });
 }

@@ -126,7 +126,7 @@ p {
     background-color: transparent !important;
     border: none !important;
     box-shadow: none !important;
-    font-size: 8pt;
+    font-size: 10pt;
 }
 
 /* Targeting the arrow within the custom class tooltip */

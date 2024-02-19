@@ -1,7 +1,10 @@
-const express = require('express');
-const fetch = require('node-fetch');
-const path = require('path');
+let fetch;
+(async () => {
 
+const fetchModule = await import('node-fetch');
+fetch = fetchModule.default;
+const express = require('express');
+const path = require('path');
 const app = express();
 const port = 3000;
 
@@ -134,3 +137,5 @@ app.get('/traffic', async (req, res) => {
       res.status(500).send('Error fetching VATSIM data');
   }
 });
+
+})();
