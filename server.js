@@ -25,6 +25,17 @@ app.get('/api/finland.kml', async (req, res) => {
     }
 });
 
+app.get('/api/estonia.kml', async (req, res) => {
+    try {
+        const kmlResponse = await fetch('https://aup.eans.ee/aup.kml');
+        const kmlText = await kmlResponse.text();
+        res.send(kmlText);
+    } catch (error) {
+        console.error('Error fetching KML:', error);
+        res.status(500).send('Error fetching KML');
+    }
+});
+
 // load SIGMETs
 app.get('/sigmet', async (req, res) => {
     try {

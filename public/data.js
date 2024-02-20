@@ -665,7 +665,7 @@ var airportInformation = [
             { name: "RADAR COVERAGE CHART", url: "https://wiki.vatsim-scandinavia.org/link/223#bkmrk--29" }
         ],
         serviceType: [
-            { description: "1. Combined tower-radar based on ATS surveillance systems" }
+            { description: "Combined tower-radar based on ATS surveillance systems" }
         ]
     },
     { 
@@ -689,7 +689,7 @@ var airportInformation = [
             { name: "MILITARY RTF", url: "https://wiki.vatsim-scandinavia.org/books/special-procedures/chapter/military-and-border-guard" }
         ],
         serviceType: [
-            { description: "1. Combined tower-radar based on procedural separation<br>- Military aerodrome" }
+            { description: "Combined tower-radar based on procedural separation<br>- Military aerodrome" }
         ]
     },
     { 
@@ -712,7 +712,25 @@ var airportInformation = [
             { name: "PROC CHART RWY 24", url: "https://wiki.vatsim-scandinavia.org/link/206#bkmrk-runway-24" }
         ],
         serviceType: [
-            { description: "1. Combined tower-radar based on procedural separation<br>" }
+            { description: "Combined tower-radar based on procedural separation<br>" }
+        ]
+    },
+    { 
+        icao: "EETN", 
+        depAndArrCharts: [
+            { name: "SID RWY 08", url: "https://eaip.eans.ee/2023-12-28/graphics/eAIP/AIRAC-AMDT-08-2022/AD_2_EETN_RNAV_SID_08_en.pdf" },
+            { name: "SID RWY 26", url: "https://eaip.eans.ee/2023-12-28/graphics/eAIP/AIRAC-AMDT-08-2022/AD_2_EETN_RNAV_SID_26_en.pdf" },
+            { name: "STAR RWY 08", url: "https://eaip.eans.ee/2023-12-28/graphics/eAIP/AIRAC-AMDT-08-2022/AD_2_EETN_RNAV_STAR_08_en.pdf" },
+            { name: "STAR RWY 26", url: "https://eaip.eans.ee/2023-12-28/graphics/eAIP/AIRAC-AMDT-08-2022/AD_2_EETN_RNAV_STAR_26_en.pdf" }
+        ],
+        apchCharts: [
+            { name: "", url: "" }        
+        ],
+        otherData: [
+            { name: "LETTER OF AGREEMENT", url: "https://wiki.vatsim-scandinavia.org/attachments/229?open=true" }
+        ],
+        serviceType: [
+            { description: "Air traffic service is provided in the form of aerodrome and approach control services based on the use of ATS surveillance systems" }
         ]
     }
 ];
@@ -742,7 +760,8 @@ var airports = [
     { name: "Tampere-Pirkkala", icao: "EFTP", coords: [61.4141, 23.6044] },
     { name: "Turku", icao: "EFTU", coords: [60.5141, 22.2628] },
     { name: "Utti", icao: "EFUT", coords: [60.8964, 26.9384] },
-    { name: "Vaasa", icao: "EFVA", coords: [63.0507, 21.7622] }
+    { name: "Vaasa", icao: "EFVA", coords: [63.0507, 21.7622] },
+    { name: "Lennart Meri Tallinn", icao: "EETN", coords: [59.41, 24.83] }
 ];
 
 function aircraftData(cs) {

@@ -16,6 +16,7 @@ const isVisibleEFJYCTA = ((dayOfWeek >= 1 && dayOfWeek <= 4 && utcHours >= 6 && 
 
 async function addKMLToMap(map) {
     document.getElementById('airspaceButton').disabled = true;
+
     if (geojsonLayer) map.removeLayer(geojsonLayer);
 
     try {
@@ -39,32 +40,43 @@ async function addKMLToMap(map) {
             }
         });
 
-        const kmlResponse = await fetch('/api/finland.kml');
-        const kmlText = await kmlResponse.text();
-        const parser = new DOMParser();
-        const kml = parser.parseFromString(kmlText, 'text/xml');
-        const convertedGeoJSON = toGeoJSON.kml(kml);
         
-        // Filter and add GeoJSON as before
+        
+        
+        const fetchKML = async (url) => {
+            const response = await fetch(url);
+            const text = await response.text();
+            const parser = new DOMParser();
+            const kml = parser.parseFromString(text, 'text/xml');
+            return toGeoJSON.kml(kml);
+        };
+        
+        const finlandPromise = fetchKML('/api/finland.kml');
+        const estoniaPromise = fetchKML('/api/estonia.kml');
+        
+        const [finlandGeoJSON, estoniaGeoJSON] = await Promise.all([finlandPromise, estoniaPromise]);
+        
+        const mergedFeatures = finlandGeoJSON.features.concat(estoniaGeoJSON.features);
+        
         const filteredGeoJSON = {
-            ...convertedGeoJSON,
-            features: convertedGeoJSON.features.filter(feature => {
-                var styleId = feature.properties.styleUrl ? feature.properties.styleUrl.replace('#', '') : null;
-                return !excludeStyleIds.includes(styleId) && !(feature.properties.name === "EFJY CTA" && !isVisibleEFJYCTA);
+            type: "FeatureCollection",
+            features: mergedFeatures.filter(feature => {
+                if (feature.properties && feature.properties.visibility === "false") {
+                    return false;
+                }
+                var styleId = feature.properties?.styleUrl ? feature.properties.styleUrl.replace('#', '') : null;
+                return !excludeStyleIds.includes(styleId) && !(feature.properties?.name === "EFJY CTA" && !isVisibleEFJYCTA);
             })
         };
-
-        // Add the GeoJSON layer with adjusted styling for active KML names
+                
         geojsonLayer = L.geoJson(filteredGeoJSON, {
             style: function(feature) {
                 var styleId = feature.properties.styleUrl ? feature.properties.styleUrl.replace('#', '') : null;
                 var baseStyle = styleId && kmlStyles[styleId] ? {
                     ...kmlStyles[styleId]
                 } : { color: "white", weight: 0, opacity: 0, fillOpacity: 0 };
-
-                // If active ATC found for the airspace block
                 if (feature.properties.name && activeKmlNames.includes(feature.properties.name)) {
-                    baseStyle.weight = 2.5; // highlight controlled airspaces
+                    baseStyle.weight = 2.5;
                 }
 
                 return baseStyle;
@@ -76,12 +88,6 @@ async function addKMLToMap(map) {
                 layer.bindPopup(popupContent);
             }
         }).addTo(map).bringToBack();
-
-        var airacIcon = L.divIcon({
-            className: 'airacLabel',
-            html: "DPR_20240125"
-        });  
-        L.marker([67, 30.45], {icon: airacIcon}).addTo(map);
           
     } catch (error) {
         console.error('Error fetching or processing data:', error);
@@ -95,8 +101,14 @@ async function addKMLToMap(map) {
 document.addEventListener('DOMContentLoaded', (event) => {
     // Initialize the map
     map = L.map('map', {
-        zoomControl: false // This disables the zoom control buttons
+        zoomControl: false
     }).setView([63, 25], 6);
+
+    var airacIcon = L.divIcon({
+        className: 'airacLabel',
+        html: "DPR_20240125"
+    });  
+    L.marker([67, 30.45], {icon: airacIcon}).addTo(map);
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
@@ -250,11 +262,11 @@ const kmlStyles = {
     "TEMPO_FBZ": { color: "rgba(128, 128, 128, 0.6)", fillColor: "rgba(128, 128, 128, 0.4)", weight: 1 },
     "Other": { color: "rgba(159, 128, 96, 0.6)", fillColor: "rgba(159, 128, 96, 0.4)", weight: 1 },
     "acc": { color: "rgba(159, 128, 96, 0.6)", fillColor: "rgba(159, 128, 96, 0.4)", weight: 1 },
-    "FBZ": {
-        color: "gray",
-        fillOpacity: 0,
-        weight: 0.5,
-    }
+    "FBZ": { color: "gray", fillOpacity: 0,  weight: 0.5 },
+    "ACTIVE_FBZ": { color: "gray", fillOpacity: 0,  weight: 0.5 },
+    "PENDING_FBZ": { color: "gray", fillOpacity: 0,  weight: 0.5 },
+    "PENDING_AREA": { color: "rgba(0, 85, 255, 0.6)", fillOpacity: "0", weight: 1 },
+    "ACTIVE_AREA": { color: "rgba(0, 85, 255, 0.6)", fillColor: "rgba(0, 85, 255, 0.4)", fillOpacity: "50%", weight: 1 }
 };
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -262,6 +274,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // load FIR borders
     fetch('src/efin.geojson')
+    .then(response => response.json())
+    .then(data => {
+        L.geoJson(data, {
+            style: {
+                color: 'black',
+                weight: 1,
+                fillColor: 'transparent',
+                fillOpacity: 0
+            },
+            interactive: false,
+        }).addTo(map).bringToBack();
+    })
+    .catch(error => console.error('Error loading the GeoJSON file:', error));
+
+    // load FIR borders
+    fetch('src/eett.geojson')
     .then(response => response.json())
     .then(data => {
         L.geoJson(data, {
@@ -655,6 +683,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // EFIV
     drawExtendedCenterline(convertCoordinatesToDecimal("683558.66N 0272258.40E"), 46.99, 15, map)
     drawExtendedCenterline(convertCoordinatesToDecimal("683653.66N 0272540.02E"), 227.03, 15, map)
+    // EETN
+    drawExtendedCenterline(convertCoordinatesToDecimal("592447.97N 0244836.55E"), 90.27, 20, map)
+    drawExtendedCenterline(convertCoordinatesToDecimal("592447.42N 0245201.95E"), 270.32, 20, map)
 });
 
 function dmsToDecimal(degrees, minutes, seconds, direction) {
