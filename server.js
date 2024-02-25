@@ -6,7 +6,7 @@ fetch = fetchModule.default;
 const express = require('express');
 const path = require('path');
 const app = express();
-const port = 3000;
+const port = 4000;
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -85,11 +85,11 @@ app.get('/airport/:icao', async (req, res) => {
         }
 
         // Find the ATIS data for the ICAO
-        const atis = vatsimData.atis.find(item => item.callsign === `${icao}_ATIS`);
-        if (atis) {
-            textAtis = atis.text_atis.join(" ");
-            atisCode = atis.atis_code;
-        }
+        const { text_atis = [], atis_code = '' } = vatsimData.atis.find(item => item.callsign === `${icao}_ATIS` || item.callsign === `${icao}_D_ATIS`) || {};
+
+        textAtis = text_atis.join(" ");
+        atisCode = atis_code;
+        
 
         // Send combined METAR and ATIS data
         res.json({ metar, qnh, textAtis, atisCode });
@@ -101,52 +101,52 @@ app.get('/airport/:icao', async (req, res) => {
 
 // aircraft fetching
 app.get('/traffic', async (req, res) => {
-  try {
-      const response = await fetch('https://data.vatsim.net/v3/vatsim-data.json');
-      const data = await response.json();
+    try {
+        const response = await fetch('https://data.vatsim.net/v3/vatsim-data.json');
+        const data = await response.json();
 
-      const finlandBounds = {
-          north: 70.09,
-          south: 59.81,
-          west: 20.58,
-          east: 31.59
-      };
+        const finlandBounds = {
+            north: 70.09,
+            south: 57.00,
+            west: 18.00,
+            east: 31.59
+        };
 
-      const aircraftInFinland = data.pilots.filter(pilot => {
-          const isInFinland = pilot.latitude <= finlandBounds.north && pilot.latitude >= finlandBounds.south &&
-                              pilot.longitude >= finlandBounds.west && pilot.longitude <= finlandBounds.east;
-          const isArrivingInFinland = pilot.flight_plan && pilot.flight_plan.arrival.startsWith("EF");
-          return isInFinland || isArrivingInFinland;
-      }).map(pilot => ({
-          callsign: pilot.callsign,
-          latitude: pilot.latitude,
-          longitude: pilot.longitude,
-          altitude: pilot.altitude,
-          groundspeed: pilot.groundspeed,
-          heading: pilot.heading,
-          pic: pilot.name,
-          flight_plan: pilot.flight_plan ? {
-              aircraft_short: pilot.flight_plan.aircraft_short || 'XXXX',
-              arrival: pilot.flight_plan.arrival || 'XXXX',
-              departure: pilot.flight_plan.departure || 'XXXX',
-              frules: pilot.flight_plan.flight_rules || 'FRUL',
-              fplAcft: pilot.flight_plan.aircraft || 'ATYP/EQUIP',
-              depTime: pilot.flight_plan.deptime || 'EOBT',
-              speed: pilot.flight_plan.cruise_tas || 'TAS',
-              rfl: pilot.flight_plan.altitude || 'RFL',
-              speed: pilot.flight_plan.cruise_tas || 'TAS',
-              route: pilot.flight_plan.route || 'ROUTE',
-              eet: pilot.flight_plan.enroute_time || 'EET',
-              altn: pilot.flight_plan.alternate || '',
-              rmk: pilot.flight_plan.remarks || 'FPL18',
-          } : { aircraft_short: 'XXXX', arrival: 'XXXX' }
-      }));
+        const aircraftInFinland = data.pilots.filter(pilot => {
+            const isInFinland = pilot.latitude <= finlandBounds.north && pilot.latitude >= finlandBounds.south &&
+                                pilot.longitude >= finlandBounds.west && pilot.longitude <= finlandBounds.east;
+            const isArrivingInFinland = pilot.flight_plan && pilot.flight_plan.arrival.startsWith("EF");
+            return isInFinland || isArrivingInFinland;
+        }).map(pilot => ({
+            callsign: pilot.callsign,
+            latitude: pilot.latitude,
+            longitude: pilot.longitude,
+            altitude: pilot.altitude,
+            groundspeed: pilot.groundspeed,
+            heading: pilot.heading,
+            pic: pilot.name,
+            flight_plan: pilot.flight_plan ? {
+                aircraft_short: pilot.flight_plan.aircraft_short || 'XXXX',
+                arrival: pilot.flight_plan.arrival || 'XXXX',
+                departure: pilot.flight_plan.departure || 'XXXX',
+                frules: pilot.flight_plan.flight_rules || 'FRUL',
+                fplAcft: pilot.flight_plan.aircraft || 'ATYP/EQUIP',
+                depTime: pilot.flight_plan.deptime || 'EOBT',
+                speed: pilot.flight_plan.cruise_tas || 'TAS',
+                rfl: pilot.flight_plan.altitude || 'RFL',
+                speed: pilot.flight_plan.cruise_tas || 'TAS',
+                route: pilot.flight_plan.route || 'ROUTE',
+                eet: pilot.flight_plan.enroute_time || 'EET',
+                altn: pilot.flight_plan.alternate || '',
+                rmk: pilot.flight_plan.remarks || 'FPL18',
+            } : { aircraft_short: 'XXXX', arrival: 'XXXX' }
+        }));
 
-      res.json(aircraftInFinland);
-  } catch (error) {
-      console.error('Error fetching VATSIM data:', error);
-      res.status(500).send('Error fetching VATSIM data');
-  }
-});
+        res.json(aircraftInFinland);
+    } catch (error) {
+        console.error('Error fetching VATSIM data:', error);
+        res.status(500).send('Error fetching VATSIM data');
+    }
+    });
 
 })();

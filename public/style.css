@@ -126,7 +126,7 @@ p {
     background-color: transparent !important;
     border: none !important;
     box-shadow: none !important;
-    font-size: 10pt;
+    font-size: 8pt;
 }
 
 /* Targeting the arrow within the custom class tooltip */
@@ -192,7 +192,8 @@ button {
     background-color: #41826e;
     height: 40px;
     min-width: 40px;
-    margin-top: 1px;
+    margin-top: 2px;
+    margin-bottom: 2px;
     margin-left: 1px;
     line-height: 40px;
     vertical-align: middle;
@@ -206,7 +207,7 @@ button {
     z-index: 4000;
     background-color: white;
     height: 55px;
-    width: 160px;
+    width: 210px;
     opacity: 95%;
     padding: 4px;
 }
@@ -214,7 +215,32 @@ button {
 .aupNotification {
     position: absolute;
     left: 4px;
-    top: 46px;
+    bottom: 68px;
     z-index: 4000;
     font-size: 10pt;
+}
+
+#loadingScreen {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 5000;
+    background-color: black;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    vertical-align: middle;
+    opacity: 50%;
+    user-select: none;
+    display: none;
+}
+
+.atc-text-marker {
+    font-weight: bold;
+    white-space: nowrap;
+    color: rgba(104, 45, 134);
+    font-size: 7pt;
+    line-height: 7pt;
 }

@@ -1,57 +1,81 @@
 const atcToKmlMapping = [
-    [["EFRO_TWR", "EFRO__TWR"], ["EFRO CTR"]],
-    [["EFRO_R_TWR", "EFRO_APP", "EFRO__APP"], ["EFRO TMA"]],
-    [["EFHK_E_TWR", "EFHK_TWR", "EFHK_E__TWR"], ["EFHK CTR NORTH", "EFHK CTR SOUTH"]],
-    [["EFHK_E_APP", "EFHK_E__APP", "EFHK_APP", "EFHK__APP"], ["EFHK TMA UPPER", "EFHK TMA LOWER", "EFHK CTA WEST", "EFHK CTA EAST"]],
-    [["EFHA_TWR", "EFHA__TWR"], ["EFHA CTR"]],
-    [["EFHA_R_TWR", "EFHA_APP", "EFHA__APP"], ["EFHA TMA"]],
-    [["EFJY_TWR", "EFJY__TWR"], ["EFJY CTR"]],
-    [["EFJY_R_TWR", "EFJY_APP", "EFJY__APP"], ["EFJY TMA", "EFJY CTA"]],
-    [["EFKU_TWR", "EFKU__TWR"], ["EFKU CTR"]],
-    [["EFKU_R_TWR", "EFKU_APP", "EFKU__APP"], ["EFKU TMA"]],
-    [["EFOU_TWR", "EFOU__TWR"], ["EFOU CTR"]],
-    [["EFOU_R_TWR", "EFOU_APP", "EFOU__APP"], ["EFOU TMA", "EFOU CTR"]],
-    [["EFPO_TWR", "EFPO__TWR"], ["EFPO CTR"]],
-    [["EFPO_R_TWR", "EFPO_APP", "EFPO__APP"], ["EFPO TMA EAST", "EFPO TMA WEST"]],
-    [["EFTP_TWR", "EFTP__TWR"], ["EFTP CTR"]],
-    [["EFTP_R_TWR", "EFTP_APP", "EFTP__APP"], ["EFTP TMA EAST", "EFTP TMA WEST"]],
-    [["EFTU_TWR", "EFTU__TWR"], ["EFTU CTR"]],
-    [["EFTU_R_TWR", "EFTU_APP", "EFTU__APP"], ["EFTU TMA", "EFTU CTA"]],
-    [["EFVA_TWR", "EFVA__TWR"], ["EFVA CTR"]],
-    [["EFVA_R_TWR", "EFVA_APP", "EFVA__APP"], ["EFVA TMA", "EFVA CTA"]],
-    [["EFIV_R_TWR", "EFIV_R__TWR", "EFIV_TWR", "EFIV_I_TWR", "EFIV_I__TWR"], ["EFIV TMA", "EFIV CTR"]],
-    [["EFKT_R_TWR", "EFKT_R__TWR", "EFKT_TWR", "EFKT_I_TWR", "EFKT_I__TWR"], ["EFKT TMA", "EFKT CTR"]],
-    [["EFMA_R_TWR", "EFMA_R__TWR", "EFMA_TWR", "EFMA__TWR"], ["EFMA TMA", "EFMA CTR"]],
-    [["EFKS_P_TWR", "EFKS_P__TWR", "EFKS_TWR", "EFKS_I_TWR", "EFKS_I__TWR"], ["EFKS TMA", "EFKS CTR"]],
-    [["EFJO_P_TWR", "EFJO_P__TWR", "EFJO_TWR", "EFJO__TWR"], ["EFJO TMA", "EFJO CTR"]],
-    [["EFKE_P_TWR", "EFKE_P__TWR", "EFKE_TWR", "EFKE__TWR"], ["EFKE TMA", "EFKE CTR"]],
-    [["EFKK_P_TWR", "EFKK_P__TWR", "EFKK_TWR", "EFKK__TWR"], ["EFKK TMA", "EFKK CTR"]],
-    [["EFLP_P_TWR", "EFLP_P__TWR", "EFLP_TWR", "EFLP__TWR"], ["EFLP TMA", "EFLP CTR"]],
-    [["EFUT_P_TWR", "EFUT_P__TWR", "EFUT_TWR", "EFUT__TWR"], ["EFUT TMA", "EFUT CTR"]],
-    [["EFET_I_TWR", "EFET_I__TWR"], ["EFET FIZ LOWER", "EFET FIZ UPPER"]],
-    [["EFKI_I_TWR", "EFKI_I__TWR"], ["EFKI FIZ LOWER", "EFKI FIZ UPPER"]],
-    [["EFMI_I_TWR", "EFMI_I__TWR"], ["EFMI FIZ LOWER", "EFMI FIZ UPPER"]],
-    [["EFSA_I_TWR", "EFSA_I__TWR"], ["EFSA FIZ LOWER", "EFSA FIZ UPPER"]],
-    [["EFSI_I_TWR", "EFSI_I__TWR"], ["EFSI FIZ LOWER", "EFSI FIZ UPPER"]]
+    [["EFRO_TWR", "EFRO__TWR"], ["EFRO CTR"], "RO TWR 118.7"],
+    [["EFRO_APP", "EFRO__APP"], ["EFRO TMA"], "RO COR 129.9"],
+    [["EFRO_R_TWR", "EFRO_R__TWR"], ["EFRO TMA", "EFRO CTR"], "RO TWR (+APS)<br>118.7"],
+
+    [["EFHK_E_TWR", "EFHK_TWR", "EFHK_E__TWR"], ["EFHK CTR NORTH", "EFHK CTR SOUTH"], "HK TWR<br>118.6 / 118.85"],
+    [["EFHK_E_APP", "EFHK_E__APP", "EFHK_APP", "EFHK__APP"], ["EFHK TMA UPPER", "EFHK TMA LOWER", "EFHK CTA WEST", "EFHK CTA EAST"], "HK RAD<br>119.1 / 129.85"],
+
+    [["EFHA_TWR", "EFHA__TWR"], ["EFHA CTR"], "HA TWR 128.9"],
+    [["EFHA_APP", "EFHA__APP"], ["EFHA TMA"], "HA COR 124.55"],
+    [["EFHA_R_TWR", "EFHA_R__TWR"], ["EFHA TMA", "EFHA CTR"], "HA TWR (+APS)<br>128.9"],
+
+    [["EFJY_TWR", "EFJY__TWR"], ["EFJY CTR"], "JY TWR 118.0"],
+    [["EFJY_APP", "EFJY__APP"], ["EFJY TMA", "EFJY CTA"], "JY COR 127.0"],
+    [["EFJY_R_TWR", "EFJY_R__TWR"], ["EFJY TMA", "EFJY CTA", "EFJY CTR"], "JY TWR (+APS)<br>118.0"],
+    
+    [["EFKU_TWR", "EFKU__TWR"], ["EFKU CTR"], "KU TWR 120.15"],
+    [["EFKU_APP", "EFKU__APP"], ["EFKU TMA"], "KU COR 130.6"],
+    [["EFKU_R_TWR", "EFKU_R__TWR"], ["EFKU TMA"], "KU TWR (+APS)<br>120.15"],
+
+    [["EFOU_TWR", "EFOU__TWR"], ["EFOU CTR"], "OU TWR 124.4"],
+    [["EFOU_APP", "EFOU__APP"], ["EFOU TMA", "EFOU CTR"], "OU COR 118.15"],
+    [["EFOU_R_TWR", "EFOU_R__TWR"], ["EFOU TMA", "EFOU CTR"], "OU TWR (+APS)<br>124.4"],
+
+    [["EFPO_TWR", "EFPO__TWR"], ["EFPO CTR"], "PO TWR 119.25"],
+    [["EFPO_APP", "EFPO__APP"], ["EFPO TMA EAST", "EFPO TMA WEST"], "PO COR 128.65"],
+    [["EFPO_R_TWR", "EFPO_R__TWR"], ["EFPO TMA EAST", "EFPO TMA WEST", "EFPO CTR"], "PO TWR (+APS)<br>119.25"],
+
+    [["EFTP_TWR", "EFTP__TWR"], ["EFTP CTR"], "TP TWR 118.7"],
+    [["EFTP_APP", "EFTP__APP"], ["EFTP TMA EAST", "EFTP TMA WEST"], "TP COR 126.2"],
+    [["EFTP_R_TWR", "EFTP_R__TWR"], ["EFTP TMA EAST", "EFTP TMA WEST", "EFTP CTR"], "TP TWR (+APS)<br>118.7"],
+
+    [["EFTU_TWR", "EFTU__TWR"], ["EFTU CTR"], "TU TWR 118.3"],
+    [["EFTU_APP", "EFTU__APP"], ["EFTU TMA", "EFTU CTA"], "TU COR 120.475"],
+    [["EFTU_R_TWR", "EFTU_R__TWR"], ["EFTU TMA", "EFTU CTA", "EFTU CTR"], "TU TWR (+APS)<br>118.3"],
+
+    [["EFVA_TWR", "EFVA__TWR"], ["EFVA CTR"], "VA TWR 120.95"],
+    [["EFVA_APP", "EFVA__APP"], ["EFVA TMA", "EFVA CTA"], "VA COR 125.85"],
+    [["EFVA_R_TWR", "EFVA_R__TWR"], ["EFVA TMA", "EFVA CTA"], "VA TWR (+APS)<br>120.95"],
+    
+    [["EFIV_R_TWR", "EFIV_R__TWR", "EFIV_TWR"], ["EFIV TMA", "EFIV CTR"], "IV TWR (PROC)<br>118.0"],
+    [["EFIV_I_TWR", "EFIV_I__TWR"], ["EFIV TMA", "EFIV CTR"], "IV AFIS 118.0"],
+
+
+    [["EFKT_R_TWR", "EFKT_R__TWR", "EFKT_TWR"], ["EFKT TMA", "EFKT CTR"], "KT TWR (+APS)<br>118.95"],
+    [["EFKT_I_TWR", "EFKT_I__TWR"], ["EFKT TMA", "EFKT CTR"], "KT AFIS 118.95"],
+
+    [["EFMA_R_TWR", "EFMA_R__TWR", "EFMA_TWR", "EFMA__TWR"], ["EFMA TMA", "EFMA CTR"], "MA TWR (+APS)<br>119.6"],
+
+    [["EFKS_P_TWR", "EFKS_P__TWR", "EFKS_TWR"], ["EFKS TMA", "EFKS CTR"], "KS TWR (PROC)<br>118.65"],
+    [["EFKS_I_TWR", "EFKS_I__TWR"], ["EFKS TMA", "EFKS CTR"], "KS AFIS 118.65"],
+
+    [["EFJO_P_TWR", "EFJO_P__TWR", "EFJO_TWR", "EFJO__TWR"], ["EFJO TMA", "EFJO CTR"], "JO TWR (PROC)<br>120.9"],
+    [["EFKE_P_TWR", "EFKE_P__TWR", "EFKE_TWR", "EFKE__TWR"], ["EFKE TMA", "EFKE CTR"], "KE TWR (PROC)<br>119.4"],
+    [["EFKK_P_TWR", "EFKK_P__TWR", "EFKK_TWR", "EFKK__TWR"], ["EFKK TMA", "EFKK CTR"], "KK TWR (PROC)<br>120.1"],
+    [["EFLP_P_TWR", "EFLP_P__TWR", "EFLP_TWR", "EFLP__TWR"], ["EFLP TMA", "EFLP CTR"], "LP TWR (PROC)<br>120.2"],
+    [["EFUT_P_TWR", "EFUT_P__TWR", "EFUT_TWR", "EFUT__TWR"], ["EFUT TMA", "EFUT CTR"], "UT TWR (PROC)<br>130.8"],
+
+    [["EFET_I_TWR", "EFET_I__TWR"], ["EFET FIZ LOWER", "EFET FIZ UPPER"], "ET AFIS 122.45"],
+    [["EFKI_I_TWR", "EFKI_I__TWR"], ["EFKI FIZ LOWER", "EFKI FIZ UPPER"], "KI AFIS 118.1"],
+    [["EFMI_I_TWR", "EFMI_I__TWR"], ["EFMI FIZ LOWER", "EFMI FIZ UPPER"], "MI AFIS 123.0"],
+    [["EFSA_I_TWR", "EFSA_I__TWR"], ["EFSA FIZ LOWER", "EFSA FIZ UPPER"], "SA AFIS 118.8"],
+    [["EFSI_I_TWR", "EFSI_I__TWR"], ["EFSI FIZ LOWER", "EFSI FIZ UPPER"], "SI AFIS 123.6"],
 ];
 
-
-let activeKmlNames = [];
-
 fetch('https://data.vatsim.net/v3/vatsim-data.json')
-    .then(response => response.json())
-    .then(data => {
-        const activeAtcCodes = data.controllers.map(controller => controller.callsign);
+.then(response => response.json())
+.then(data => {
+    const activeAtcCodes = data.controllers.map(controller => controller.callsign);
 
-        activeKmlNames = [];
-        Object.entries(atcToKmlMapping).forEach(([atcCode, kmlNames]) => {
-            if (activeAtcCodes.some(activeCode => activeCode.startsWith(atcCode))) {
-                activeKmlNames.push(...kmlNames);
-            }
-        });
-    })
-    .catch(error => console.error('Error fetching VATSIM data:', error));
-
+    activeKmlNames = [];
+    Object.entries(atcToKmlMapping).forEach(([atcCode, kmlNames]) => {
+        if (activeAtcCodes.some(activeCode => activeCode.startsWith(atcCode))) {
+            activeKmlNames.push(...kmlNames);
+        }
+    });
+})
+.catch(error => console.error('Error fetching VATSIM data:', error));
 
 var vfrPoints = [
     // EFHK
@@ -325,7 +349,13 @@ var tmaPoints = [
     { name: "XELMA", dmsCoords: ["615605N", "0253746E"], direction: "top" },
     { name: "XETMU", dmsCoords: ["675224N", "0252155E"], direction: "top" },
     { name: "XEVAP", dmsCoords: ["645013N", "0241836E"], direction: "top" },
-    { name: "XORMU", dmsCoords: ["611928N", "0223854E"], direction: "top" }
+    { name: "XORMU", dmsCoords: ["611928N", "0223854E"], direction: "top" },
+
+    { name: "LUSEP", dmsCoords: ["605708N", "0251553E"], direction: "top" },
+    { name: "LAKUT", dmsCoords: ["602617N", "0235235E"], direction: "left" },
+    { name: "DIVAM", dmsCoords: ["595054N", "0233537E"], direction: "left" },
+    { name: "INTOR", dmsCoords: ["594940N", "0251112E"], direction: "bottom-right" }
+
 ];
 
 const sectorCoordinates = [
@@ -428,14 +458,7 @@ const sectorCoordinates = [
 // AIRPORT DATA
 function loadAirportData(icao) {
     console.log("Loading data for", icao);
-
-    // variables
-    var qnh;
-
-    // todo: remove other data blocks (mainly aircraft flight plans)
-
-    // AIRPORT DATA:
-
+   
     // airportHeader
     const airport = airports.find(airport => airport.icao === icao);
     if (airport) document.getElementById("airportHeader").textContent = `${icao} - ${airport.name}`;
@@ -464,8 +487,7 @@ function loadAirportData(icao) {
 
     // Open container and display data
     document.getElementById("content").style.display = "block";
-    document.getElementById("map").style.width = "55%";
-    document.getElementById("header").style.right = "45%";
+    document.getElementById("header").style.right = "31%";
     document.getElementById("aircraftContainer").style.display = "none";
     document.getElementById("airportDataContainer").style.display = "block";
 }
@@ -732,6 +754,111 @@ var airportInformation = [
         serviceType: [
             { description: "Air traffic service is provided in the form of aerodrome and approach control services based on the use of ATS surveillance systems" }
         ]
+    },
+    { 
+        icao: "ESSA", 
+        depAndArrCharts: [
+            { name: "", url: "" },
+        ],
+        apchCharts: [
+            { name: "", url: "" }        
+        ],
+        otherData: [
+            { name: "LETTER OF AGREEMENT", url: "https://wiki.vatsim-scandinavia.org/attachments/230?open=true" }
+        ],
+        serviceType: [
+            { description: "Flights via COPs between LUPET and KELAS with destination inside Stockholm TMA and cruising level above FL200 will by EFIN be given descent clearance to FL200.<br<br>Traffic departing EFMA and with destination inside Stockholm TMA may be cleared direct XILAN." }
+        ]
+    },
+    { 
+        icao: "ESSB", 
+        depAndArrCharts: [
+            { name: "", url: "" },
+        ],
+        apchCharts: [
+            { name: "", url: "" }        
+        ],
+        otherData: [
+            { name: "LETTER OF AGREEMENT", url: "https://wiki.vatsim-scandinavia.org/attachments/230?open=true" }
+        ],
+        serviceType: [
+            { description: "Flights via COPs between LUPET and KELAS with destination inside Stockholm TMA and cruising level above FL200 will by EFIN be given descent clearance to FL200.<br<br>Traffic departing EFMA and with destination inside Stockholm TMA may be cleared direct XILAN." }
+        ]
+    },
+    { 
+        icao: "ESOW", 
+        depAndArrCharts: [
+            { name: "", url: "" },
+        ],
+        apchCharts: [
+            { name: "", url: "" }        
+        ],
+        otherData: [
+            { name: "LETTER OF AGREEMENT", url: "https://wiki.vatsim-scandinavia.org/attachments/230?open=true" }
+        ],
+        serviceType: [
+            { description: "Flights via COPs between LUPET and KELAS with destination inside Stockholm TMA and cruising level above FL200 will by EFIN be given descent clearance to FL200.<br<br>Traffic departing EFMA and with destination inside Stockholm TMA may be cleared direct XILAN." }
+        ]
+    },
+    { 
+        icao: "ESCM", 
+        depAndArrCharts: [
+            { name: "", url: "" },
+        ],
+        apchCharts: [
+            { name: "", url: "" }        
+        ],
+        otherData: [
+            { name: "LETTER OF AGREEMENT", url: "https://wiki.vatsim-scandinavia.org/attachments/230?open=true" }
+        ],
+        serviceType: [
+            { description: "Flights via COPs between LUPET and KELAS with destination inside Stockholm TMA and cruising level above FL200 will by EFIN be given descent clearance to FL200.<br<br>Traffic departing EFMA and with destination inside Stockholm TMA may be cleared direct XILAN." }
+        ]
+    },
+    { 
+        icao: "ESSU", 
+        depAndArrCharts: [
+            { name: "", url: "" },
+        ],
+        apchCharts: [
+            { name: "", url: "" }        
+        ],
+        otherData: [
+            { name: "LETTER OF AGREEMENT", url: "https://wiki.vatsim-scandinavia.org/attachments/230?open=true" }
+        ],
+        serviceType: [
+            { description: "Flights via COPs between LUPET and KELAS with destination inside Stockholm TMA and cruising level above FL200 will by EFIN be given descent clearance to FL200.<br<br>Traffic departing EFMA and with destination inside Stockholm TMA may be cleared direct XILAN." }
+        ]
+    },
+    { 
+        icao: "ESNU", 
+        depAndArrCharts: [
+            { name: "", url: "" },
+        ],
+        apchCharts: [
+            { name: "", url: "" }        
+        ],
+        otherData: [
+            { name: "LETTER OF AGREEMENT", url: "https://wiki.vatsim-scandinavia.org/attachments/230?open=true" }
+        ],
+        serviceType: [
+            { description: "Flights between EFVA TMA and ESNU TMA at or below FL95 shall be transferred to ESNU_TWR 119.805 unless otherwise coordinated.<br><br>A special position named ESSR_CTR exists. When online, it covers regional airports in Sweden where no local APP/TWR is online. Callsign and frequency to be used when transferring aircraft to ESSR_CTR are the local ATC callsign and frequency unless otherwise coordinated." }
+        ]
+    },
+    { 
+        icao: "ESPA", 
+        depAndArrCharts: [
+            { name: "", url: "" },
+        ],
+        apchCharts: [
+            { name: "", url: "" }        
+        ],
+        otherData: [
+            { name: "LETTER OF AGREEMENT", url: "https://wiki.vatsim-scandinavia.org/attachments/230?open=true" }
+        ],
+        serviceType: [
+            { description: "" }
+        ]
     }
 ];
 
@@ -761,14 +888,22 @@ var airports = [
     { name: "Turku", icao: "EFTU", coords: [60.5141, 22.2628] },
     { name: "Utti", icao: "EFUT", coords: [60.8964, 26.9384] },
     { name: "Vaasa", icao: "EFVA", coords: [63.0507, 21.7622] },
-    { name: "Lennart Meri Tallinn", icao: "EETN", coords: [59.41, 24.83] }
+    { name: "Lennart Meri Tallinn", icao: "EETN", coords: [59.41, 24.83] },
+    { name: "Stockholm Arlanda", icao: "ESSA", coords: [59.65417, 17.93806] },
+    { name: "Uppsala Air Base", icao: "ESCM", coords: [59.89722, 17.58861] },
+    { name: "Eskilstuna", icao: "ESSU", coords: [59.35000, 16.70833] },
+    { name: "Stockholm Bromma", icao: "ESSB", coords: [59.35556, 17.94167] },
+    { name: "Stockholm Vesterås", icao: "ESOW", coords: [59.58944, 16.63361] },
+    { name: "Umeå", icao: "ESNU", coords: [63.79167, 20.28278] },
+    { name: "Luleå Kallax", icao: "ESPA", coords: [65.54361, 22.12194] }
 ];
 
 function aircraftData(cs) {
     // Open container and display data
+    document.getElementById("fplHeader").innerHTML = "";
+    document.getElementById("atcFpl").innerHTML = "";
     document.getElementById("content").style.display = "block";
-    document.getElementById("map").style.width = "55%";
-    document.getElementById("header").style.right = "45%";
+    document.getElementById("header").style.right = "31%";
     document.getElementById("aircraftContainer").style.display = "block";
     document.getElementById("airportDataContainer").style.display = "none";
     document.getElementById("fplHeader").innerHTML = cs + " ATC Flight Plan";
@@ -796,7 +931,7 @@ function aircraftData(cs) {
             };
 
             document.getElementById("atcFpl").innerHTML = `
-                (FPL-${cs}-${atcFlightPlan.frules}<br>
+                (FPL-${cs}-${atcFlightPlan.frules}S<br>
                 -${atcFlightPlan.fplAcft}<br>
                 -${atcFlightPlan.departure}${atcFlightPlan.depTime}<br>
                 -N${atcFlightPlan.speed}${formatAltitude(atcFlightPlan.rfl)} ${atcFlightPlan.route}<br>
@@ -852,3 +987,460 @@ function addPdfOverlays() {
         addOverlayIfNeeded();
     });
 }
+
+var airways = [
+    { 
+        name: "Y369", 
+        type: "EFHK DEP | PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.3-en-GB.html#ENR-3.3`,
+        points: [
+            { name: "NUNTO", dmsCoords: ["600501N", "0235337E"] },
+            { name: "PISOX", dmsCoords: ["594641N", "0224504E"] },
+            { name: "REKDO", dmsCoords: ["592635N", "0213340E"] }
+        ]
+    },
+    { 
+        name: "Y367", 
+        type: "EFHK DEP | PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.3-en-GB.html#ENR-3.3`,
+        points: [
+            { name: "NUNTO", dmsCoords: ["600501N", "0235337E"] },
+            { name: "ABSER", dmsCoords: ["595350N", "0225948E"] },
+            { name: "EKNID", dmsCoords: ["594300N", "0220945E"] },
+            { name: "OLPED", dmsCoords: ["593459N", "0213339E"] }
+        ]
+    },
+    { 
+        name: "Y366", 
+        type: "EFHK DEP | PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.3-en-GB.html#ENR-3.3`,
+        points: [
+            { name: "KUVEM", dmsCoords: ["601126N", "0235614E"] },
+            { name: "UMUGI", dmsCoords: ["600214N", "0224141E"] },
+            { name: "USITU", dmsCoords: ["595131N", "0212157E"] }
+        ]
+    },
+    { 
+        name: "Y365", 
+        type: "EFHK DEP | PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.3-en-GB.html#ENR-3.3`,
+        points: [
+            { name: "ADIVO", dmsCoords: ["601751N", "0235853E"] },
+            { name: "PEPIG", dmsCoords: ["600829N", "0223559E"] },
+            { name: "POGOK", dmsCoords: ["595928N", "0212316E"] }
+        ]
+    },
+    { 
+        name: "Y361", 
+        type: "EFHK DEP | PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.3-en-GB.html#ENR-3.3`,
+        points: [
+            { name: "NEPEK", dmsCoords: ["604433N", "0242908E"] },
+            { name: "NISVI", dmsCoords: ["610734N", "0240255E"] }
+        ]
+    },
+    { 
+        name: "Y75", 
+        type: "EFHK DEP | PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.3-en-GB.html#ENR-3.3`,
+        points: [
+            { name: "TEVRU", dmsCoords: ["604916N", "0244929E"] },
+            { name: "DIPUM", dmsCoords: ["611300N", "0245508E"] },
+            { name: "USUPO", dmsCoords: ["613645N", "0250056E"] }
+        ]
+    },
+    { 
+        name: "Y232", 
+        type: "EFHK DEP | PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.3-en-GB.html#ENR-3.3`,
+        points: [
+            { name: "IDEPI", dmsCoords: ["604239N", "0254739E"] },
+            { name: "TUSBI", dmsCoords: ["610405N", "0261823E"] },
+            { name: "ADOPO", dmsCoords: ["612524N", "0264950E"] }
+        ]
+    },
+    { 
+        name: "DCT", 
+        type: "EFHK DEP | PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.3-en-GB.html#ENR-3.3`,
+        points: [
+            { name: "IDEPI", dmsCoords: ["604239N", "0254739E"] },
+            { name: "ROKVI", dmsCoords: ["605139N", "0270123E"] }
+        ]
+    },
+    { 
+        name: "T82", 
+        type: "EFHK DEP | PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.3-en-GB.html#ENR-3.3`,
+        points: [
+            { name: "ARVEP", dmsCoords: ["601458N", "0262357E"] },
+            { name: "RATMU", dmsCoords: ["601416N", "0263209E"] }
+        ]
+    },
+    { 
+        name: "Y357", 
+        type: "EFHK DEP | PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.3-en-GB.html#ENR-3.3`,
+        points: [
+            { name: "NEPEK", dmsCoords: ["604433N", "0242908E"] },
+            { name: "EVLIT", dmsCoords: ["610247N", "0230429E"] }
+        ]
+    },
+    { 
+        name: "Y375", 
+        type: "EFHK DEP | PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.3-en-GB.html#ENR-3.3`,
+        points: [
+            { name: "NEPEK", dmsCoords: ["604433N", "0242908E"] },
+            { name: "UXADA", dmsCoords: ["605100N", "0223648E"] }
+        ]
+    },
+    { 
+        name: "Y117 (compulsory EETT->ESAA)", 
+        type: "EFHK DEP | PERM",
+        link: `https://eaip.eans.ee/2023-12-28/html/eAIP/EE-ENR-3.5-en-GB.html#ENR-3.5`,
+        points: [
+            { name: "VALOX", dmsCoords: ["594354N", "0240820E"] },
+            { name: "DANKA", dmsCoords: ["593557N", "0235706E"] },
+            { name: "ROSAX", dmsCoords: ["592835N", "0234646E"] }
+        ]
+    },
+    { 
+        name: "Y123", 
+        type: "EFHK DEP | PERM",
+        link: `https://eaip.eans.ee/2023-12-28/html/eAIP/EE-ENR-3.5-en-GB.html#ENR-3.5`,
+        points: [
+            { name: "KOIVU", dmsCoords: ["595041N", "0243955E"] },
+            { name: "LARTI", dmsCoords: ["594010N", "0243458E"] }
+        ]
+    },
+    { 
+        name: "Q77 (compulsory ADES EETU)", 
+        type: "EFHK DEP | PERM",
+        link: `https://eaip.eans.ee/2023-12-28/html/eAIP/EE-ENR-3.5-en-GB.html#ENR-3.5`,
+        points: [
+            { name: "LARTI", dmsCoords: ["594010N", "0243458E"] },
+            { name: "KEXLE", dmsCoords: ["592441N", "0245018E"] }
+        ]
+    },
+    { 
+        name: "Q55", 
+        type: "EFHK ARR | PERM",
+        link: `https://eaip.eans.ee/2023-12-28/html/eAIP/EE-ENR-3.5-en-GB.html#ENR-3.5`,
+        points: [
+            { name: "OSMUR", dmsCoords: ["591457N", "0232833E"] },
+            { name: "SORPA", dmsCoords: ["593701N", "0245049E"] }
+        ]
+    },
+    { 
+        name: "Q33", 
+        type: "EFHK ARR | PERM",
+        link: `https://eaip.eans.ee/2023-12-28/html/eAIP/EE-ENR-3.5-en-GB.html#ENR-3.5`,
+        points: [
+            { name: "LONSA", dmsCoords: ["590456N", "0235004E"] },
+            { name: "SORPA", dmsCoords: ["593701N", "0245049E"] },
+            { name: "INTOR", dmsCoords: ["594940N", "0251112E"] }
+        ]
+    },
+    { 
+        name: "Q22", 
+        type: "EFHK ARR | PERM",
+        link: `https://eaip.eans.ee/2023-12-28/html/eAIP/EE-ENR-3.5-en-GB.html#ENR-3.5`,
+        points: [
+            { name: "SULUN", dmsCoords: ["585818N", "0240407E"] },
+            { name: "KEXLE", dmsCoords: ["592441N", "0245018E"] },
+        ]
+    },
+    { 
+        name: "Q11", 
+        type: "EFHK ARR | PERM",
+        link: `https://eaip.eans.ee/2023-12-28/html/eAIP/EE-ENR-3.5-en-GB.html#ENR-3.5`,
+        points: [
+            { name: "KEMET", dmsCoords: ["584321N", "0243513E"] },
+            { name: "KUNUX", dmsCoords: ["585552N", "0243943E"] },
+            { name: "KEXLE", dmsCoords: ["592441N", "0245018E"] },
+            { name: "BEKNA", dmsCoords: ["592441N", "0245018E"] },
+            { name: "INTOR", dmsCoords: ["594940N", "0251112E"] }
+        ]
+    },
+    { 
+        name: "Q77", 
+        type: "EFHK ARR | PERM",
+        link: `https://eaip.eans.ee/2023-12-28/html/eAIP/EE-ENR-3.5-en-GB.html#ENR-3.5`,
+        points: [
+            { name: "GONOS", dmsCoords: ["585633N", "0253437E"] },
+            { name: "IBUZU", dmsCoords: ["590040N", "0252814E"] }
+        ]
+    },
+    { 
+        name: "Q92", 
+        type: "EFHK ARR | PERM",
+        link: `https://eaip.eans.ee/2023-12-28/html/eAIP/EE-ENR-3.5-en-GB.html#ENR-3.5`,
+        points: [
+            { name: "IBUZU", dmsCoords: ["590040N", "0252814E"] },
+            { name: "ARSAM", dmsCoords: ["592651N", "0252125E"] },
+            { name: "INTOR", dmsCoords: ["594940N", "0251112E"] }
+        ]
+    },
+    { 
+        name: "Q141", 
+        type: "EFHK ARR | PERM",
+        link: `https://eaip.eans.ee/2023-12-28/html/eAIP/EE-ENR-3.5-en-GB.html#ENR-3.5`,
+        points: [
+            { name: "BIRSI", dmsCoords: ["590655N", "0260215E"] },
+            { name: "LEMLA", dmsCoords: ["592451N", "0254044E"] },
+            { name: "GEPTA", dmsCoords: ["593448N", "0252914E"] },
+            { name: "INTOR", dmsCoords: ["594940N", "0251112E"] }
+        ]
+    },
+    { 
+        name: "Y370", 
+        type: "EFHK ARR | PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.3-en-GB.html#ENR-3.3`,
+        points: [
+            { name: "EVADI", dmsCoords: ["592023N", "0215126E"] },
+            { name: "RUMEP", dmsCoords: ["593045N", "0222556E"] },
+            { name: "NIPIB", dmsCoords: ["594057N", "0230048E"] },
+            { name: "DIVAM", dmsCoords: ["595054N", "0233537E"] }
+        ]
+    },
+    { 
+        name: "Y364", 
+        type: "EFHK ARR | PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.3-en-GB.html#ENR-3.3`,
+        points: [
+            { name: "RIRIP", dmsCoords: ["601210N", "0212603E"] },
+            { name: "ODESO", dmsCoords: ["601934N", "0223902E"] },
+            { name: "LAKUT", dmsCoords: ["602617N", "0235235E"] }
+        ]
+    },
+    { 
+        name: "Y363", 
+        type: "EFHK ARR | PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.3-en-GB.html#ENR-3.3`,
+        points: [
+            { name: "IBVUT", dmsCoords: ["602135N", "0212040E"] },
+            { name: "PEKUX", dmsCoords: ["602419N", "0223732E"] },
+            { name: "LAKUT", dmsCoords: ["602617N", "0235235E"] }
+        ]
+    },
+    { 
+        name: "Y368", 
+        type: "EFHK ARR | PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.3-en-GB.html#ENR-3.3`,
+        points: [
+            { name: "OTKIL", dmsCoords: ["602830N", "0212204E"] },
+            { name: "BEVOM", dmsCoords: ["602752N", "0222837E"] },
+            { name: "IPMOT", dmsCoords: ["602711N", "0231035E"] },
+            { name: "LAKUT", dmsCoords: ["602617N", "0235235E"] }
+        ]
+    },
+    { 
+        name: "Y362", 
+        type: "EFHK ARR | PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.3-en-GB.html#ENR-3.3`,
+        points: [
+            { name: "ENETI", dmsCoords: ["610429N", "0233420E"] },
+            { name: "AMROT", dmsCoords: ["602938N", "0234233E"] },
+            { name: "LAKUT", dmsCoords: ["602617N", "0235235E"] }
+        ]
+    },
+    { 
+        name: "Y349", 
+        type: "EFHK ARR | PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.3-en-GB.html#ENR-3.3`,
+        points: [
+            { name: "UXADA", dmsCoords: ["605100N", "0223648E"] },
+            { name: "AMROT", dmsCoords: ["602938N", "0234233E"] }
+        ]
+    },
+    { 
+        name: "Y86", 
+        type: "EFHK ARR | PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.3-en-GB.html#ENR-3.3`,
+        points: [
+            { name: "IBOSU", dmsCoords: ["613712N", "0251743E"] },
+            { name: "ERNUT", dmsCoords: ["611710N", "0251647E"] },
+            { name: "LUSEP", dmsCoords: ["605708N", "0251553E"] }
+        ]
+    },
+    { 
+        name: "T83", 
+        type: "EFHK ARR | PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.3-en-GB.html#ENR-3.3`,
+        points: [
+            { name: "NAPRU", dmsCoords: ["613504N", "0260540E"] },
+            { name: "OTPAL", dmsCoords: ["611608N", "0254032E"] },
+            { name: "LUSEP", dmsCoords: ["605708N", "0251553E"] }
+        ]
+    },
+    { 
+        name: "Y358", 
+        type: "EFHK ARR | PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.3-en-GB.html#ENR-3.3`,
+        points: [
+            { name: "ROKVI", dmsCoords: ["605139N", "0270123E"] },
+            { name: "VEPIN", dmsCoords: ["603753N", "0261959E"] }
+        ]
+    },
+    { 
+        name: "Y359", 
+        type: "EFHK ARR | PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.3-en-GB.html#ENR-3.3`,
+        points: [
+            { name: "ARLOM", dmsCoords: ["604725N", "0274353E"] },
+            { name: "VEPIN", dmsCoords: ["603753N", "0261959E"] }
+        ]
+    },
+    { 
+        name: "M130", 
+        type: "CDR 1 H24",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.2%20M130-en-GB.html#ENR-3.2-M130`,
+        points: [
+            { name: "GATRI", dmsCoords: ["645600N", "0293700E"] },
+            { name: "IXUBI", dmsCoords: ["642834N", "0280821E"] },
+            { name: "ASRIS", dmsCoords: ["641123N", "0271540E"] },
+            { name: "ODRUB", dmsCoords: ["640414N", "0265422E"] },
+            { name: "BAVMO", dmsCoords: ["635658N", "0263301E"] },
+            { name: "XEVLO", dmsCoords: ["632157N", "0252249E"] },
+            { name: "SOPEB", dmsCoords: ["622803N", "0241435E"] },
+            { name: "KOFUT", dmsCoords: ["614304N", "0232109E"] },
+            { name: "TOHAT", dmsCoords: ["611944N", "0225440E"] }
+        ]
+    },
+    { 
+        name: "N156", 
+        type: "CDR 1 H24",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.2%20N156-en-GB.html#ENR-3.2-N156`,
+        points: [
+            { name: "RUDAM", dmsCoords: ["671214N", "0292404E"] },
+            { name: "DEPUK", dmsCoords: ["674005N", "0263739E"] }
+        ]
+    },
+    { 
+        name: "T95", 
+        type: "PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.2%20T95-en-GB.html#ENR-3.2-T95`,
+        points: [
+            { name: "UGLUM", dmsCoords: ["632455N", "0273827E"] },
+            { name: "ETROD", dmsCoords: ["635705N", "0274819E"] },
+            { name: "ASRIS", dmsCoords: ["641123N", "0271540E"] },
+            { name: "UBIGA", dmsCoords: ["642305N", "0264818E"] },
+            { name: "UGMOR", dmsCoords: ["643940N", "0260830E"] },
+            { name: "EVSET", dmsCoords: ["645915N", "0252804E"] }
+        ]
+    },
+    { 
+        name: "T255", 
+        type: "PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.2%20T255-en-GB.html#ENR-3.2-T255`,
+        points: [
+            { name: "DIVEG", dmsCoords: ["625444N", "0214317E"] },
+            { name: "RERBU", dmsCoords: ["631356N", "0221513E"] },
+            { name: "ATPEL", dmsCoords: ["632358N", "0223208E"] },
+            { name: "VAXUN", dmsCoords: ["635903N", "0234218E"] },
+            { name: "IXONO", dmsCoords: ["643530N", "0244107E"] },
+            { name: "LOBGA", dmsCoords: ["643927N", "0244841E"] },
+            { name: "NOPNI", dmsCoords: ["645741N", "0245843E"] },
+            { name: "RIBVU", dmsCoords: ["650850N", "0250745E"] }
+        ]
+    },
+    { 
+        name: "Y71", 
+        type: "CDR 1 H24",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.2%20Y71-en-GB.html#ENR-3.2-Y71`,
+        points: [
+            { name: "DIVEG", dmsCoords: ["625444N", "0214317E"] },
+            { name: "DODEP", dmsCoords: ["634324N", "0252356E"] },
+            { name: "BAVMO", dmsCoords: ["635658N", "0263301E"] }
+        ]
+    },
+    { 
+        name: "Y75", 
+        type: "PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.2%20Y75-en-GB.html#ENR-3.2-Y75`,
+        points: [
+            { name: "USUPO", dmsCoords: ["613645N", "0250056E"] },
+            { name: "ROMOP", dmsCoords: ["615124N", "0250129E"] },
+            { name: "OTLUD", dmsCoords: ["620939N", "0250211E"] },
+            { name: "OSKEK", dmsCoords: ["624007N", "0250322E"] },
+            { name: "ADEDO", dmsCoords: ["624616N", "0250336E"] },
+            { name: "MIMRU", dmsCoords: ["631758N", "0250453E"] },
+            { name: "ELPOP", dmsCoords: ["634621N", "0250603E"] },
+            { name: "SUVIB", dmsCoords: ["642555N", "0250744E"] },
+            { name: "RIBVU", dmsCoords: ["650850N", "0250745E"] },
+            { name: "ASLUP", dmsCoords: ["652355N", "0250741E"] },
+            { name: "NEPIX", dmsCoords: ["660630N", "0250727E"] },
+            { name: "APTEN", dmsCoords: ["662412N", "0250422E"] },
+            { name: "IBSAN", dmsCoords: ["664230N", "0250105E"] },
+            { name: "EVIMI", dmsCoords: ["671506N", "0245502E"] },
+            { name: "GITEV", dmsCoords: ["673648N", "0245018E"] }
+        ]
+    },
+    { 
+        name: "Y77", 
+        type: "CDR 1 H24",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.2%20Y77-en-GB.html#ENR-3.2-Y77`,
+        points: [
+            { name: "TADOX", dmsCoords: ["623151N", "0222034E"] },
+            { name: "ABOXU", dmsCoords: ["633457N", "0252329E"] },
+            { name: "BAVMO", dmsCoords: ["635658N", "0263301E"] }
+        ]
+    },
+    { 
+        name: "Y81", 
+        type: "CDR 1 H24",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.2%20Y81-en-GB.html#ENR-3.2-Y81`,
+        points: [
+            { name: "PENIV", dmsCoords: ["612847N", "0220017E"] },
+            { name: "SAFEK", dmsCoords: ["620252N", "0225742E"] },
+            { name: "LOFAD", dmsCoords: ["623506N", "0235446E"] },
+            { name: "XEVLO", dmsCoords: ["632157N", "0252249E"] }
+        ]
+    },
+    { 
+        name: "Y86", 
+        type: "PERM",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.2%20Y86-en-GB.html#ENR-3.2-Y86`,
+        points: [
+            { name: "IBOSU", dmsCoords: ["613712N", "0251743E"] },
+            { name: "BEPEM", dmsCoords: ["615844N", "0251843E"] },
+            { name: "ATSEN", dmsCoords: ["620437N", "0251900E"] },
+            { name: "GOSVA", dmsCoords: ["623128N", "0252017E"] },
+            { name: "ELSOV", dmsCoords: ["624815N", "0252107E"] },
+            { name: "XEVLO", dmsCoords: ["632157N", "0252249E"] },
+            { name: "ABOXU", dmsCoords: ["633457N", "0252329E"] },
+            { name: "DODEP", dmsCoords: ["634324N", "0252356E"] },
+            { name: "OTBAR", dmsCoords: ["635002N", "0252416E"] },
+            { name: "MIKNU", dmsCoords: ["642639N", "0252614E"] },
+            { name: "EVSET", dmsCoords: ["645915N", "0252804E"] },
+            { name: "GULDU", dmsCoords: ["650658N", "0252830E"] },
+            { name: "UPEDU", dmsCoords: ["651753N", "0252908E"] },
+            { name: "RENVI", dmsCoords: ["660434N", "0253154E"] },
+            { name: "ULROM", dmsCoords: ["662806N", "0252813E"] },
+            { name: "OSLIT", dmsCoords: ["665145N", "0252423E"] },
+            { name: "TUGPU", dmsCoords: ["671726N", "0252004E"] },
+            { name: "GITEV", dmsCoords: ["673648N", "0245018E"] }
+        ]
+    },
+    { 
+        name: "Y351", 
+        type: "CDR 1 H24",
+        link: `https://www.ais.fi/eaip/${chartDate}/eAIP/EF-ENR%203.2%20Y351-en-GB.html#ENR-3.2-Y351`,
+        points: [
+            { name: "RUDAM", dmsCoords: ["671214N", "0292404E"] },
+            { name: "NOELA", dmsCoords: ["675556N", "0265314E"] }
+        ]
+    }
+];
+
+/*
+{ 
+    name: "xxx", 
+    type: "EFHK DEP | PERM",
+    points: [
+        { name: "NEPEK", dmsCoords: ["xxx", "xxx"] },
+        { name: "UXADA", dmsCoords: ["xxx", "xxx"] }
+    ]
+}
+*/

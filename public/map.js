@@ -1,9 +1,12 @@
 var map;
 let geojsonLayer; 
+let atcNamesLayer;
 let sigmetLayers = [];
 let aircraftMarkers;
 let mainLines = [];
 let crossLines = [];
+var airwaysVisible = false;
+activeKmlNames = [];
 
 // EFJY CTA
 const now = new Date();
@@ -15,34 +18,35 @@ const isVisibleEFJYCTA = ((dayOfWeek >= 1 && dayOfWeek <= 4 && utcHours >= 6 && 
 // FRI 0600-1200 UTC
 
 async function addKMLToMap(map) {
-    document.getElementById('airspaceButton').disabled = true;
-
-    if (geojsonLayer) map.removeLayer(geojsonLayer);
+    document.getElementById('loadingScreen').style.display = "inline-flex";
 
     try {
-        // Await the fetching and processing of VATSIM data to ensure activeKmlNames is ready
         const vatsimResponse = await fetch('https://data.vatsim.net/v3/vatsim-data.json');
         const vatsimData = await vatsimResponse.json();
         const activeAtcCodes = vatsimData.controllers.map(controller => controller.callsign);
-        
 
-        activeKmlNames = [];
-        
+        let activeKmlNames = [];
+        let activeKmlTexts = new Map(); // Map to hold KML names to their texts
+        let displayedTexts = new Set(); // Set to track which ATC texts have been displayed
+
         atcToKmlMapping.forEach(mapping => {
-            const [atcCodes, kmlNames] = mapping;
-            // Check if any ATC code in this entry is active
-            const isActive = atcCodes.some(atcCode => 
-                activeAtcCodes.some(activeCode => activeCode.startsWith(atcCode))
+            const [atcCodes, kmlNames, atcText] = mapping;
+            const isActive = atcCodes.some(atcCode =>
+                activeAtcCodes.includes(atcCode) // Use includes for exact match
             );
 
             if (isActive) {
-                activeKmlNames.push(...kmlNames);
+                kmlNames.forEach(kmlName => {
+                    if (!activeKmlNames.includes(kmlName)) {
+                        activeKmlNames.push(kmlName);
+                        if (!displayedTexts.has(atcText)) { // Only map text if not already displayed
+                            activeKmlTexts.set(kmlName, atcText);
+                        }
+                    }
+                });
             }
         });
 
-        
-        
-        
         const fetchKML = async (url) => {
             const response = await fetch(url);
             const text = await response.text();
@@ -50,14 +54,13 @@ async function addKMLToMap(map) {
             const kml = parser.parseFromString(text, 'text/xml');
             return toGeoJSON.kml(kml);
         };
-        
+
         const finlandPromise = fetchKML('/api/finland.kml');
         const estoniaPromise = fetchKML('/api/estonia.kml');
-        
+
         const [finlandGeoJSON, estoniaGeoJSON] = await Promise.all([finlandPromise, estoniaPromise]);
-        
         const mergedFeatures = finlandGeoJSON.features.concat(estoniaGeoJSON.features);
-        
+
         const filteredGeoJSON = {
             type: "FeatureCollection",
             features: mergedFeatures.filter(feature => {
@@ -68,35 +71,56 @@ async function addKMLToMap(map) {
                 return !excludeStyleIds.includes(styleId) && !(feature.properties?.name === "EFJY CTA" && !isVisibleEFJYCTA);
             })
         };
-                
+
+        if (geojsonLayer) map.removeLayer(geojsonLayer);
+        if (atcNamesLayer) map.removeLayer(atcNamesLayer);
+
         geojsonLayer = L.geoJson(filteredGeoJSON, {
             style: function(feature) {
                 var styleId = feature.properties.styleUrl ? feature.properties.styleUrl.replace('#', '') : null;
-                var baseStyle = styleId && kmlStyles[styleId] ? {
-                    ...kmlStyles[styleId]
-                } : { color: "white", weight: 0, opacity: 0, fillOpacity: 0 };
+                var baseStyle = styleId && kmlStyles[styleId] ? { ...kmlStyles[styleId] } : { 
+                    color: "white", 
+                    weight: 0, 
+                    opacity: 0, 
+                    fillOpacity: 0,
+                    interactive: false
+                };
                 if (feature.properties.name && activeKmlNames.includes(feature.properties.name)) {
                     baseStyle.weight = 2.5;
                 }
-
                 return baseStyle;
             },
             onEachFeature: function(feature, layer) {
-                var popupContent = `
-                    ${feature.properties.name}
-                `;
-                layer.bindPopup(popupContent);
+                if (feature.properties.name && activeKmlNames.includes(feature.properties.name)) {
+                    const correspondingATCText = activeKmlTexts.get(feature.properties.name);
+                    if (correspondingATCText && !displayedTexts.has(correspondingATCText)) {
+                        const bounds = L.geoJson(feature).getBounds();
+                        const southLatLng = bounds.getSouth(); // Get the latitude of the southern boundary
+                        const centerLng = bounds.getCenter().lng; // Get the longitude of the center
+                        const textLatLng = [southLatLng, centerLng];
+                        
+                        const textOptions = {
+                            className: 'atc-text-marker', // Add a custom class for styling
+                            html: `<div>${correspondingATCText}</div>`,
+                            iconAnchor: [0, 0],
+                            iconSize: [0, 0],
+                        };
+                        atcNamesLayer = L.marker(textLatLng, { icon: L.divIcon({ html: `<div>${correspondingATCText}</div>`, ...textOptions }) }).addTo(map);
+
+                        displayedTexts.add(correspondingATCText); // Mark this text as displayed
+                    }
+                }
             }
-        }).addTo(map).bringToBack();
-          
+        }).addTo(map).bringToBack();          
     } catch (error) {
         console.error('Error fetching or processing data:', error);
     } finally {
-        document.getElementById('airspaceButton').disabled = false;
+        document.getElementById('loadingScreen').style.display = "none";
     }
 
     console.log("Airspace and ATC activity loaded");    
 }
+
 
 document.addEventListener('DOMContentLoaded', (event) => {
     // Initialize the map
@@ -123,14 +147,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
     setInterval(() => {
         addKMLToMap(map);
     }, 120000);
-
-    // Finland's approximate bounding box coordinates
-    const finlandBounds = {
-        north: 70.09,
-        south: 59.81,
-        west: 20.58,
-        east: 31.59
-    };
 
     aircraftMarkers = L.layerGroup().addTo(map);
 
@@ -197,7 +213,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     fetch('/flow')
     .then(response => response.json())
     .then(data => {
-        const filteredData = data.filter(entry => entry.notified_flight_information_regions.includes(20));
+        const filteredData = data.filter(entry => entry.notified_flight_information_regions.includes(14));
         let textContent = '';
 
         filteredData.forEach(entry => {
@@ -207,48 +223,46 @@ document.addEventListener('DOMContentLoaded', (event) => {
             const endTime = new Date(entry.endtime);
 
             const validityTime = `${startTime.getUTCDate()} ${startTime.toLocaleString('en-US', { month: 'short' }).toUpperCase()} ${('0' + startTime.getUTCHours()).slice(-2)}${('0' + startTime.getUTCMinutes()).slice(-2)}z - ${endTime.getUTCDate()} ${endTime.toLocaleString('en-US', { month: 'short' }).toUpperCase()} ${('0' + endTime.getUTCHours()).slice(-2)}${('0' + endTime.getUTCMinutes()).slice(-2)}z`;
-
+            
             const measureType = entry.measure.type.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
             let measureValue = entry.measure.value;
             if (Array.isArray(measureValue)) {
                 measureValue = measureValue.join(', ');
             }
+            if (measureType === "Minimum Departure Interval") {
+                measureValue = Math.round(measureValue / 60) + " Minutes";
+            }
             const filters = entry.filters.map(filter => `${filter.type}: ${filter.value.join(', ')}`).join('<br>');
 
             let reason = entry.reason;
 
-            // Accumulate text content for each entry
             textContent += 
             `⚠️ <b>${ident} | ${validityTime}</b><br>
             ${measureType}: 
             ${measureValue}<br>${filters}<br>
-            Reason: ${reason}<br><br>`; // Add <br> for spacing between entries
+            Reason: ${reason}<br><br>`;
         });
 
-        // Create marker with accumulated text content
         L.marker([59, 29.4122], { icon: L.divIcon({ className: 'flowLabel', html: textContent }) }).addTo(map);
     })
     .catch(error => console.error('Error fetching data:', error));
 
 });
 
-
-// Helper function for formatting altitude
 function formatAltitude(altitude) {
     if (altitude <= 5000 && altitude > 300) return 'A' + Math.floor(altitude / 100).toString().padStart(2, '0');
     else if (altitude > 5000) return 'F' + Math.floor(altitude / 100).toString().padStart(2, '0');
     return '';
 }
 
-// Helper function for formatting speed
 function formatSpeed(speed) {
     return speed < 30 ? '' : speed.toString();
 }
 
 const kmlStyles = {
-    "G": { color: "rgba(69, 130, 181, 0.6)", fillOpacity: 0, weight: 1 },
-    "C": { color: "rgba(56, 52, 148, 0.6)", fillOpacity: 0, weight: 1 },
-    "D": { color: "rgba(104, 45, 134, 0.6)", fillOpacity: 0, weight: 1 },
+    "G": { color: "rgba(69, 130, 181, 0.6)", fillOpacity: 0, weight: 1, interactive: false },
+    "C": { color: "rgba(56, 52, 148, 0.6)", fillOpacity: 0, weight: 1, interactive: false },
+    "D": { color: "rgba(104, 45, 134, 0.6)", fillOpacity: 0, weight: 1, interactive: false },
     "Danger": { color: "darkorange", fillColor: "darkorange", fillOpacity: "40%", weight: 1 },
     "TEMPO_D": { color: "darkorange", fillColor: "darkorange", fillOpacity: "40%",weight: 1 },
     "Restricted": { color: "rgba(239, 8, 16, 0.6)", fillColor: "rgba(239, 8, 16, 0.4)", fillOpacity: "50%", weight: 1 },
@@ -264,9 +278,7 @@ const kmlStyles = {
     "acc": { color: "rgba(159, 128, 96, 0.6)", fillColor: "rgba(159, 128, 96, 0.4)", weight: 1 },
     "FBZ": { color: "gray", fillOpacity: 0,  weight: 0.5 },
     "ACTIVE_FBZ": { color: "gray", fillOpacity: 0,  weight: 0.5 },
-    "PENDING_FBZ": { color: "gray", fillOpacity: 0,  weight: 0.5 },
-    "PENDING_AREA": { color: "rgba(0, 85, 255, 0.6)", fillOpacity: "0", weight: 1 },
-    "ACTIVE_AREA": { color: "rgba(0, 85, 255, 0.6)", fillColor: "rgba(0, 85, 255, 0.4)", fillOpacity: "50%", weight: 1 }
+    "ACTIVE_AREA": { color: "rgba(0, 85, 255, 0.6)", fillColor: "rgba(0, 85, 255, 0.4)", fillOpacity: "0", weight: 1 }
 };
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -288,7 +300,6 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .catch(error => console.error('Error loading the GeoJSON file:', error));
 
-    // load FIR borders
     fetch('src/eett.geojson')
     .then(response => response.json())
     .then(data => {
@@ -301,6 +312,29 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             interactive: false
         }).addTo(map).bringToBack();
+    })
+    .catch(error => console.error('Error loading the GeoJSON file:', error));
+
+    // Neighbouring TMAs
+    fetch('src/swedenAndTallinn.geojson')
+    .then(response => response.json())
+    .then(data => {
+        L.geoJson(data, {
+            style: {
+                color: "rgba(56, 52, 148, 1)",
+                weight: 1,
+                fillOpacity: 0,
+                fillColor: "black",
+                interactive: true,
+                fillOpacity: 1
+            },
+            onEachFeature: function(feature, layer) {
+                layer.bindPopup(
+                    `${feature.properties.name}<br>` +
+                    `${feature.properties.Base} - ${feature.properties.Top}`
+                );
+            }
+        }).addTo(map);
     })
     .catch(error => console.error('Error loading the GeoJSON file:', error));
 
@@ -323,8 +357,8 @@ document.addEventListener('DOMContentLoaded', function() {
         var marker = L.marker(coords, {
             icon: L.icon({
                 iconUrl: vfrIcon,
-                iconSize: [8, 8], // Size of the icon
-                iconAnchor: [4, 4] // Center of the triangle
+                iconSize: [8, 8],
+                iconAnchor: [4, 4]
             })
         });
     
@@ -390,6 +424,75 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var vfrLayer = L.layerGroup(vfrPoints.map(createVfrMarker));
     var ifrLayer = L.layerGroup(tmaPoints.map(createIfrMarker));
+
+    // load airways
+    document.getElementById("airwaysButton").addEventListener("click", function() {
+        if (airwaysVisible) {
+            airways.forEach(function(airway) {
+                if (airway.layer) {
+                    map.removeLayer(airway.layer);
+                }
+                airway.points.forEach(function(point) {
+                    if (point.layer) {
+                        map.removeLayer(point.layer);
+                    }
+                });
+            });
+            airwaysVisible = false;
+            document.getElementById('airwaysButton').style.backgroundColor = "#484b4c";
+        } else {
+            airways.forEach(function(airway) {
+                var waypoints = airway.points.map(function(point) {
+                    var coords = convertToLatLng(point.dmsCoords[0], point.dmsCoords[1]);
+                    var marker = L.marker(coords, {
+                        icon: L.icon({
+                            iconUrl: ifrIcon,
+                            iconSize: [8, 8],
+                            iconAnchor: [4, 4]
+                        })
+                    }).bindPopup(point.name);
+                    point.layer = marker; // Store reference to marker
+                    return marker;
+                });
+        
+                waypoints.forEach(function(marker) {
+                    marker.addTo(map); // Add marker to map
+                });
+        
+                var color, dashArray;
+                if (airway.type === "EFHK DEP | PERM") {
+                    color = "#298cff";
+                    weight = 2;
+                    dashArray = null;
+                } else if (airway.type === "EFHK ARR | PERM") {
+                    color = "orange";
+                    weight = 2;
+                    dashArray = null;
+                } else if (airway.type === "CDR 1 H24") {
+                    color = "black";
+                    weight = 1;
+                    dashArray = "4, 4";
+                } else {
+                    color = "black";
+                    weight = 1;
+                    dashArray = null;
+                }
+                
+                var polyline = L.polyline(waypoints.map(function(waypoint) { return waypoint.getLatLng(); }), {
+                    color: color,
+                    weight: weight,
+                    dashArray: dashArray
+                }).bindPopup("RTE ID: <b>" + airway.name + "</b><br>Type: " + airway.type)
+                .addTo(map);
+
+                airway.layer = polyline;
+            });
+            airwaysVisible = true;
+            document.getElementById('airwaysButton').style.backgroundColor = "#41826e";
+        }
+    });
+    
+    
 
     // toggle functionality
     var vfrFixButton = document.getElementById('vfrFixButton');
@@ -521,10 +624,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function toggleAirspace() {
         if (map.hasLayer(geojsonLayer)) {
             map.removeLayer(geojsonLayer);
+            map.removeLayer(atcNamesLayer);
             document.getElementById('airspaceButton').style.backgroundColor = "#484b4c";
 
         } else {
             geojsonLayer.addTo(map).bringToBack();
+            atcNamesLayer.addTo(map).bringToBack();
             document.getElementById('airspaceButton').style.backgroundColor = "#41826e";
         }
     }
@@ -536,7 +641,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch('/sigmet')
         .then(response => response.json())
         .then(sigmets => {
-            const firIds = ['EFIN', 'ULLL', 'ESAA', 'EETT'];
+            const firIds = ['EFIN', 'ULLL', 'ESAA', 'EETT', 'ENOR'];
             drawSigmetsForFIRs(sigmets, firIds);
         })
         .catch(error => console.error('Error fetching SIGMET data:', error));
