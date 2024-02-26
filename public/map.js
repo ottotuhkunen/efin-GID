@@ -1,6 +1,6 @@
 var map;
 let geojsonLayer; 
-let atcNamesLayer;
+let atcNamesLayer = [];
 let sigmetLayers = [];
 let aircraftMarkers;
 let mainLines = [];
@@ -18,8 +18,12 @@ const isVisibleEFJYCTA = ((dayOfWeek >= 1 && dayOfWeek <= 4 && utcHours >= 6 && 
 // FRI 0600-1200 UTC
 
 async function addKMLToMap(map) {
-    document.getElementById('loadingScreen').style.display = "inline-flex";
+    document.getElementById('airspaceButton').disabled = true;
 
+    if (!geojsonLayer) {
+        document.getElementById('loadingScreen').style.display = "inline-flex";
+    }
+    
     try {
         const vatsimResponse = await fetch('https://data.vatsim.net/v3/vatsim-data.json');
         const vatsimData = await vatsimResponse.json();
@@ -74,6 +78,10 @@ async function addKMLToMap(map) {
 
         if (geojsonLayer) map.removeLayer(geojsonLayer);
         if (atcNamesLayer) map.removeLayer(atcNamesLayer);
+        atcNamesLayer.forEach(function(marker) {
+            map.removeLayer(marker);
+        });
+        atcNamesLayer = [];
 
         geojsonLayer = L.geoJson(filteredGeoJSON, {
             style: function(feature) {
@@ -105,19 +113,22 @@ async function addKMLToMap(map) {
                             iconAnchor: [0, 0],
                             iconSize: [0, 0],
                         };
-                        atcNamesLayer = L.marker(textLatLng, { icon: L.divIcon({ html: `<div>${correspondingATCText}</div>`, ...textOptions }) }).addTo(map);
+                        var marker = L.marker(textLatLng, { icon: L.divIcon({ html: `<div>${correspondingATCText}</div>`, ...textOptions }) }).addTo(map);
+
+                        atcNamesLayer.push(marker);
 
                         displayedTexts.add(correspondingATCText); // Mark this text as displayed
                     }
                 }
+                layer.bindPopup(feature.properties.name);
             }
         }).addTo(map).bringToBack();          
     } catch (error) {
         console.error('Error fetching or processing data:', error);
     } finally {
         document.getElementById('loadingScreen').style.display = "none";
+        document.getElementById('airspaceButton').disabled = false;
     }
-
     console.log("Airspace and ATC activity loaded");    
 }
 
@@ -152,57 +163,55 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     function updateAircraftPositions() {
         fetch('/traffic')
-            .then(response => response.json())
-            .then(data => {
-                aircraftMarkers.clearLayers();
-                data.forEach(pilot => {
-                    // Formatting altitude and speed
-                    const formattedAltitude = formatAltitude(pilot.altitude);
-                    const formattedSpeed = formatSpeed(pilot.groundspeed);
-                    const aircraftShort = pilot.flight_plan.aircraft_short || 'XXXX';
-                    const arrival = pilot.flight_plan.arrival || 'XXXX';
-    
-                    var htmlContent = `
-                        <div class="custom-marker">
-                            <div class="heading-line" style="transform: rotate(${pilot.heading - 90}deg);"></div>
-                            <div class="marker-square"></div>
-                            <div class="marker-text">
-                                <span class="always-visible">${pilot.callsign}</span>
-                                <span class="on-hover-content">
-                                    ${aircraftShort}<br>
-                                    ${formattedAltitude} ${formattedSpeed} ${arrival}
-                                </span>
-                            </div>
+        .then(response => response.json())
+        .then(data => {
+            aircraftMarkers.clearLayers();
+            data.forEach(pilot => {
+                // Formatting altitude and speed
+                const formattedAltitude = formatAltitude(pilot.altitude);
+                const formattedSpeed = formatSpeed(pilot.groundspeed);
+                const aircraftShort = pilot.flight_plan.aircraft_short || 'XXXX';
+                const arrival = pilot.flight_plan.arrival || 'XXXX';
+
+                var htmlContent = `
+                    <div class="custom-marker">
+                        <div class="heading-line" style="transform: rotate(${pilot.heading - 90}deg);"></div>
+                        <div class="marker-square"></div>
+                        <div class="marker-text">
+                            <span class="always-visible">${pilot.callsign}</span>
+                            <span class="on-hover-content">
+                                ${aircraftShort}<br>
+                                ${formattedAltitude} ${formattedSpeed} ${arrival}
+                            </span>
                         </div>
-                    `;
-    
-                    var marker = L.divIcon({
-                        className: 'custom-div-icon',
-                        html: htmlContent,
-                        iconSize: [5, 5],
-                        iconAnchor: [5, 5]
-                    });
-    
-                    L.marker([pilot.latitude, pilot.longitude], { icon: marker })
-                        .on('click', function() {
-                            aircraftData(pilot.callsign);
-                        })
-                        .addTo(aircraftMarkers);
+                    </div>
+                `;
+
+                var marker = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: htmlContent,
+                    iconSize: [5, 5],
+                    iconAnchor: [5, 5]
                 });
-            })
-            .catch(error => console.error('Error fetching aircraft positions:', error));
+
+                L.marker([pilot.latitude, pilot.longitude], { icon: marker })
+                    .on('click', function() {
+                        aircraftData(pilot.callsign);
+                    })
+                    .addTo(aircraftMarkers);
+            });
+        })
+        .catch(error => console.error('Error fetching aircraft positions:', error));
     }
 
     updateAircraftPositions();
-    setInterval(updateAircraftPositions, 30000);
+    setInterval(updateAircraftPositions, 20000);
     
     // Close data window
     var closeButton = document.getElementById("closeContentWindow");
     if (closeButton) {
         closeButton.addEventListener("click", function() {
             document.getElementById("content").style.display = "none";
-            document.getElementById("map").style.width = "100%";
-            document.getElementById("header").style.right = "0%";
             document.getElementById("airportDataContainer").style.display = "none";
         });
     }
@@ -264,15 +273,15 @@ const kmlStyles = {
     "C": { color: "rgba(56, 52, 148, 0.6)", fillOpacity: 0, weight: 1, interactive: false },
     "D": { color: "rgba(104, 45, 134, 0.6)", fillOpacity: 0, weight: 1, interactive: false },
     "Danger": { color: "darkorange", fillColor: "darkorange", fillOpacity: "40%", weight: 1 },
-    "TEMPO_D": { color: "darkorange", fillColor: "darkorange", fillOpacity: "40%",weight: 1 },
+    "TEMPO_D": { color: "darkorange", fillColor: "darkorange", fillOpacity: "20%", weight: 1, dashArray: "4 4" },
     "Restricted": { color: "rgba(239, 8, 16, 0.6)", fillColor: "rgba(239, 8, 16, 0.4)", fillOpacity: "50%", weight: 1 },
     "TEMPO_R": { color: "rgba(239, 8, 16, 0.6)", fillColor: "rgba(239, 8, 16, 0.4)", fillOpacity: "50%", weight: 1 },
     "Prohibited": { color: "rgba(255, 0, 0, 0.6)", fillColor: "rgba(255, 0, 0, 0.4)", fillOpacity: "50%", weight: 1 },
     "TEMPO_P": { color: "rgba(255, 0, 0, 0.6)", fillColor: "rgba(255, 0, 0, 0.4)", fillOpacity: "50%", weight: 1 },
-    "TSA": { color: "rgba(0, 85, 255, 0.6)", fillColor: "rgba(0, 85, 255, 0.4)", fillOpacity: "50%", weight: 1 },
-    "TRA": { color: "rgba(0, 85, 255, 0.6)", fillColor: "rgba(0, 85, 255, 0.4)", fillOpacity: "50%", weight: 1 },
-    "TEMPO_TSA": { color: "rgba(0, 85, 255, 0.6)", fillColor: "rgba(0, 85, 255, 0.4)", fillOpacity: "50%", weight: 1 },
-    "TEMPO_TRA": { color: "rgba(0, 85, 255, 0.6)", fillColor: "rgba(0, 85, 255, 0.4)", fillOpacity: "50%", weight: 1 },
+    "TSA": { color: "rgba(0, 85, 255, 0.4)", fillColor: "rgba(0, 85, 255, 0.4)", fillOpacity: "20%", weight: 1, dashArray: "4 4"},
+    "TRA": { color: "rgba(0, 85, 255, 0.4)", fillColor: "rgba(0, 85, 255, 0.4)", fillOpacity: "20%", weight: 1, dashArray: "4 4"},
+    "TEMPO_TSA": { color: "rgba(0, 85, 255, 0.4)", fillColor: "rgba(0, 85, 255, 0.4)", fillOpacity: "20%", weight: 1, dashArray: "4 4"},
+    "TEMPO_TRA": { color: "rgba(0, 85, 255, 0.4)", fillColor: "rgba(0, 85, 255, 0.4)", fillOpacity: "20%", weight: 1, dashArray: "4 4"},
     "TEMPO_FBZ": { color: "rgba(128, 128, 128, 0.6)", fillColor: "rgba(128, 128, 128, 0.4)", weight: 1 },
     "Other": { color: "rgba(159, 128, 96, 0.6)", fillColor: "rgba(159, 128, 96, 0.4)", weight: 1 },
     "acc": { color: "rgba(159, 128, 96, 0.6)", fillColor: "rgba(159, 128, 96, 0.4)", weight: 1 },
@@ -285,27 +294,12 @@ document.addEventListener('DOMContentLoaded', function() {
     var accSectorLayer = L.layerGroup();
 
     // load FIR borders
-    fetch('src/efin.geojson')
+    fetch('src/firs.json')
     .then(response => response.json())
     .then(data => {
         L.geoJson(data, {
             style: {
-                color: 'black',
-                weight: 1,
-                fillColor: 'transparent',
-                fillOpacity: 0
-            },
-            interactive: false,
-        }).addTo(map).bringToBack();
-    })
-    .catch(error => console.error('Error loading the GeoJSON file:', error));
-
-    fetch('src/eett.geojson')
-    .then(response => response.json())
-    .then(data => {
-        L.geoJson(data, {
-            style: {
-                color: 'black',
+                color: 'darkGreen',
                 weight: 1,
                 fillColor: 'transparent',
                 fillOpacity: 0
@@ -313,7 +307,8 @@ document.addEventListener('DOMContentLoaded', function() {
             interactive: false
         }).addTo(map).bringToBack();
     })
-    .catch(error => console.error('Error loading the GeoJSON file:', error));
+    .catch(error => console.error('Error loading the JSON file:', error));
+
 
     // Neighbouring TMAs
     fetch('src/swedenAndTallinn.geojson')
@@ -557,6 +552,15 @@ document.addEventListener('DOMContentLoaded', function() {
         maxZoom: 9,
     }).addTo(map);
 
+    function updateRadarLayer() {
+        var uniqueTime = new Date().getTime();
+        radarLayer.setParams({ _uniqueTime: uniqueTime });
+        console.log("Weather radar updated");
+    }
+
+    // updating weather radar every 5 minutes
+    setInterval(updateRadarLayer, 300000);
+
 
     // BUTTON MAPPING
     document.getElementById('wxButton').addEventListener('click', function() {
@@ -623,14 +627,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // other airspaces (CTR, TMA and FIZ) toggle button
     function toggleAirspace() {
         if (map.hasLayer(geojsonLayer)) {
-            map.removeLayer(geojsonLayer);
-            map.removeLayer(atcNamesLayer);
             document.getElementById('airspaceButton').style.backgroundColor = "#484b4c";
-
+            map.removeLayer(geojsonLayer);
+            atcNamesLayer.forEach(function(marker) {
+                map.removeLayer(marker);
+            });
         } else {
-            geojsonLayer.addTo(map).bringToBack();
-            atcNamesLayer.addTo(map).bringToBack();
             document.getElementById('airspaceButton').style.backgroundColor = "#41826e";
+            map.addLayer(geojsonLayer);
+            atcNamesLayer.forEach(function(marker) {
+                marker.addTo(map); // add marker to map
+            });
         }
     }
 
@@ -688,27 +695,47 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // make airports
     airports.forEach(function(airport) {
-        var circle = L.circleMarker(airport.coords, {
-            radius: 5,
-            fillColor: "coral",
-            color: "#000",
-            weight: 1,
-            opacity: 1,
-            fillOpacity: 0.8
+        var customIcon = L.icon({
+            iconUrl: '/src/airport.png',
+            iconSize: [16, 16], // Adjust the size as needed
+            iconAnchor: [8, 8], // Adjust the anchor point if necessary
+            popupAnchor: [0, -10] // Adjust the popup anchor if necessary
+        });
+    
+        // Create marker with custom icon
+        var marker = L.marker(airport.coords, {
+            icon: customIcon
         }).addTo(map);
     
-        circle.bindTooltip(airport.icao, {
+        marker.bindTooltip(airport.icao, {
             permanent: false,
             className: 'custom-tooltip',
             direction: 'top',
             offset: L.point(10, 5)
         });
-
-        circle.on('click', function() {
+    
+        marker.on('click', function() {
             loadAirportData(airport.icao);
         });
-
+    
+        // Fetch pilot data from the /traffic endpoint
+        fetch('/traffic')
+        .then(response => response.json())
+        .then(data => {
+            // Check if any pilot is flying to or from this airport
+            var isAirportActive = data.some(pilot => pilot.flight_plan.departure === airport.icao || pilot.flight_plan.arrival === airport.icao);
+            
+            // If active, set the icon URL to activeAirport.png, otherwise set it back to airport.png
+            if (isAirportActive) {
+                customIcon.options.iconUrl = '/src/activeAirport.png';
+                marker.setIcon(customIcon);
+            } else {
+                customIcon.options.iconUrl = '/src/airport.png';
+                marker.setIcon(customIcon);
+            }
+        });
     });
+    
 
     // make runway extended centerlines
 

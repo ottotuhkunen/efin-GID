@@ -487,7 +487,6 @@ function loadAirportData(icao) {
 
     // Open container and display data
     document.getElementById("content").style.display = "block";
-    document.getElementById("header").style.right = "31%";
     document.getElementById("aircraftContainer").style.display = "none";
     document.getElementById("airportDataContainer").style.display = "block";
 }
@@ -715,6 +714,118 @@ var airportInformation = [
         ]
     },
     { 
+        icao: "EFHA", 
+        depAndArrCharts: [
+            { name: "STAR RWY 08", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFHA/EF_AD_2_EFHA_08_STAR.pdf" },
+            { name: "STAR RWY 26", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFHA/EF_AD_2_EFHA_26_STAR.pdf" }
+        ],
+        apchCharts: [
+            { name: "RNP RWY 08 (2700 FT)", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFHA/EF_AD_2_EFHA_08_RNP.pdf" },
+            { name: "ILS Z RWY 26 (2700 FT)", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFHA/EF_AD_2_EFHA_26_ILSZ.pdf" }
+        ],
+        otherData: [
+            { name: "VAC - CTR MAX 1700 FT", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFHA/EF_AD_2_EFHA_VAC.pdf" },
+            { name: "LOCAL TRA CHART", url: "https://www.ais.fi/localtra/Tra/EFHA_Local_TRA_12_NOV_2015.pdf" },
+            { name: "MILITARY RTF", url: "https://wiki.vatsim-scandinavia.org/books/special-procedures/chapter/military-and-border-guard" }
+        ],
+        serviceType: [
+            { description: "1. Combined tower-radar; or<br>2. Separate tower and radar units based on ATS surveillance systems<br>- Military aerodrome" }
+        ]
+    },
+    { 
+        icao: "EFMI", 
+        depAndArrCharts: [
+            { name: "", url: "" },
+        ],
+        apchCharts: [
+            { name: "ILS Z RWY 11 (2200 FT)", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFMI/EF_AD_2_EFMI_11_ILSZ.pdf" },
+            { name: "RNP RWY 29 (2200 FT)", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFMI/EF_AD_2_EFMI_29_RNP.pdf" }
+        ],
+        otherData: [
+            { name: "VAC", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFMI/EF_AD_2_EFMI_VAC.pdf" },
+            { name: "AFIS RTF", url: "https://wiki.vatsim-scandinavia.org/books/sop/page/afis-phraseology" }
+        ],
+        serviceType: [
+            { description: "Aerodrome Flight Information Service (AFIS)" }
+        ]
+    },
+    { 
+        icao: "EFSA", 
+        depAndArrCharts: [
+            { name: "STAR RWY 12", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFSA/EF_AD_2_EFSA_12_STAR.pdf" },
+            { name: "STAR RWY 30", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFSA/EF_AD_2_EFSA_30_STAR.pdf" }
+        ],
+        apchCharts: [
+            { name: "ILS RWY 12 (2400 FT)", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFSA/EF_AD_2_EFSA_12_ILS.pdf" },
+            { name: "RNP RWY 30 (2400 FT)", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFSA/EF_AD_2_EFSA_12_RNP.pdf" }
+        ],
+        otherData: [
+            { name: "VAC", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFSA/EF_AD_2_EFSA_VAC.pdf" },
+            { name: "AFIS RTF", url: "https://wiki.vatsim-scandinavia.org/books/sop/page/afis-phraseology" }
+        ],
+        serviceType: [
+            { description: "Aerodrome Flight Information Service (AFIS)" }
+        ]
+    },
+    { 
+        icao: "EFSI", 
+        depAndArrCharts: [
+            { name: "", url: "" }
+        ],
+        apchCharts: [
+            { name: "RNP RWY 14 (2500 FT)", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFSI/EF_AD_2_EFSI_14_RNP.pdf" },
+            { name: "ILS Z RWY 32 (2500 FT)", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFSI/EF_AD_2_EFSI_32_ILSZ.pdf" }
+        ],
+        otherData: [
+            { name: "VAC", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFSI/EF_AD_2_EFSI_VAC.pdf" },
+            { name: "AFIS RTF", url: "https://wiki.vatsim-scandinavia.org/books/sop/page/afis-phraseology" }
+        ],
+        serviceType: [
+            { description: "Aerodrome Flight Information Service (AFIS)" }
+        ]
+    },
+    { 
+        icao: "EFJY", 
+        depAndArrCharts: [
+            { name: "STAR RWY 12", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFJY/EF_AD_2_EFJY_12_STAR.pdf" },
+            { name: "STAR RWY 30", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFJY/EF_AD_2_EFJY_30_STAR.pdf" }
+        ],
+        apchCharts: [
+            { name: "RNP RWY 12 (2900 FT)", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFJY/EF_AD_2_EFJY_12_RNP.pdf" },
+            { name: "ILS Z RWY 30 (2900 FT)", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFJY/EF_AD_2_EFJY_30_ILSZ.pdf" }
+        ],
+        otherData: [
+            { name: "VAC - CTR MAX 1500 FT", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFJY/EF_AD_2_EFJY_VAC.pdf" },
+            { name: "LOCAL TRA CHART", url: "https://www.ais.fi/localtra/Tra/EFJY_LOCAL_TRA_18_APR_2024.pdf" },
+            { name: "MILITARY RTF", url: "https://wiki.vatsim-scandinavia.org/books/special-procedures/chapter/military-and-border-guard" }
+        ],
+        serviceType: [
+            { description: "1. Combined tower-radar; or<br>2. Separate tower and radar units based on ATS surveillance systems" }
+        ]
+    },
+    { 
+        icao: "EFKU", 
+        depAndArrCharts: [
+            { name: "SID RWY 15", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFKU/EF_AD_2_EFKU_15_SIDR.pdf" },
+            { name: "SID RWY 33", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFKU/EF_AD_2_EFKU_33_SIDR.pdf" },
+            { name: "STAR RWY 15", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFKU/EF_AD_2_EFKU_15_STAR.pdf" },
+            { name: "STAR RWY 33", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFKU/EF_AD_2_EFKU_33_STAR.pdf" }
+        ],
+        apchCharts: [
+            { name: "RNP RWY 15 (2700 FT)", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFKU/EF_AD_2_EFKU_15_RNP.pdf" },
+            { name: "ILS Z RWY 33 (2700 FT)", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFKU/EF_AD_2_EFKU_33_ILSZ.pdf" }
+        ],
+        otherData: [
+            { name: "VAC - CTR MAX 1500 FT", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFKU/EF_AD_2_EFKU_VAC.pdf" },
+            { name: "LOCAL TRA CHART", url: "https://www.ais.fi/localtra/Tra/EFKU_LOCAL_TRA_18_APR_2024.pdf" },
+            { name: "FINNHEMS 60 LOP (EFPH)", url: "https://wiki.vatsim-scandinavia.org/books/special-procedures/page/efph-finnhems-60" },
+            { name: "MILITARY RTF", url: "https://wiki.vatsim-scandinavia.org/books/special-procedures/chapter/military-and-border-guard" }
+        ],
+        serviceType: [
+            { description: "1. Combined tower-radar; or<br>2. Separate tower and radar units based on ATS surveillance systems" }
+        ]
+    },
+    { 
         icao: "EFLP", 
         depAndArrCharts: [
             { name: "SID RWY 06", url: "https://www.ais.fi/eaip/{chartDate}/documents/Root_WePub/ANSFI/Charts/AD/EFLP/EF_AD_2_EFLP_06_SIDR.pdf" },
@@ -753,6 +864,21 @@ var airportInformation = [
         ],
         serviceType: [
             { description: "Air traffic service is provided in the form of aerodrome and approach control services based on the use of ATS surveillance systems" }
+        ]
+    },
+    { 
+        icao: "EEEI", 
+        depAndArrCharts: [
+            { name: "", url: "" },
+        ],
+        apchCharts: [
+            { name: "", url: "" }        
+        ],
+        otherData: [
+            { name: "LETTER OF AGREEMENT", url: "https://wiki.vatsim-scandinavia.org/attachments/229?open=true" }
+        ],
+        serviceType: [
+            { description: "Military Air Base" }
         ]
     },
     { 
@@ -895,7 +1021,9 @@ var airports = [
     { name: "Stockholm Bromma", icao: "ESSB", coords: [59.35556, 17.94167] },
     { name: "Stockholm Vesterås", icao: "ESOW", coords: [59.58944, 16.63361] },
     { name: "Umeå", icao: "ESNU", coords: [63.79167, 20.28278] },
-    { name: "Luleå Kallax", icao: "ESPA", coords: [65.54361, 22.12194] }
+    { name: "Luleå Kallax", icao: "ESPA", coords: [65.54361, 22.12194] },
+    { name: "Ämäri Air Base", icao: "EEEI", coords: [59.2622, 24.2083] 
+    }
 ];
 
 function aircraftData(cs) {
@@ -903,7 +1031,6 @@ function aircraftData(cs) {
     document.getElementById("fplHeader").innerHTML = "";
     document.getElementById("atcFpl").innerHTML = "";
     document.getElementById("content").style.display = "block";
-    document.getElementById("header").style.right = "31%";
     document.getElementById("aircraftContainer").style.display = "block";
     document.getElementById("airportDataContainer").style.display = "none";
     document.getElementById("fplHeader").innerHTML = cs + " ATC Flight Plan";
@@ -962,6 +1089,10 @@ const pdfOverlays = [
     {
         url: 'src/eftu.svg',
         bounds: [[60.498975, 22.227712], [60.498975, 22.308875], [60.527238, 22.308875], [60.527238, 22.227712]]
+    },
+    {
+        url: 'src/efma.svg',
+        bounds: [[60.105744, 19.872418], [60.105744, 19.926273], [60.144505, 19.926273], [60.144505, 19.872418]]
     }
 ];
 

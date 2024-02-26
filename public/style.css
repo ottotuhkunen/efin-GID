@@ -1,10 +1,9 @@
 body {
     padding: 0;
     margin: 0;
-    height: 100%;
-    display: flex;
     font-family: "Arimo", sans-serif;
     /*font-family: "Lucida Console", "Courier New", monospace;*/
+    overflow: hidden;
 }
 
 ::-webkit-scrollbar {
@@ -19,7 +18,7 @@ body {
 }
 
 #header {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0%;
@@ -41,18 +40,28 @@ h3 {
 
 #map { 
     height: 100vh;
-    width: 100%; /* width: 55% when content window is open */
+    width: 100%;
     border-right: 1px solid black;
 }
 
 #content {
+    position: absolute;
+    right: 0;
+    top: 44px;
     height: 100vh;
-    width: 45%;
+    width: 40%;
     overflow-y: auto;
-    padding-left: 3pt;
+    padding-left: 6pt;
     padding-right: 6pt;
     z-index: 2000;
     background-color: white;
+    opacity: 95%;
+}
+
+@media only screen and (max-width: 539px) {
+    #content {
+        top: 88px;
+    }
 }
 
 p {
