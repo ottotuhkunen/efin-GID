@@ -10,7 +10,7 @@ const port = process.env.PORT || 4000;
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-/*
+
 app.use((req, res, next) => {
     if (req.header('x-forwarded-proto') !== 'https' && process.env.NODE_ENV === 'production') {
         res.redirect(`https://${req.header('host')}${req.url}`);
@@ -20,7 +20,7 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static('.'));
-*/
+
 
 app.listen(port, () => {
     console.log(`Server listening at ${port}`);

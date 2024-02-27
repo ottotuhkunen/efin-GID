@@ -1,0 +1,118 @@
+body {
+    color: black;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,.5);
+    -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
+}
+
+#header {
+    background-color: #1a475f;
+}
+
+p span {
+    color: #dfebeb;
+}
+
+#content {
+    background-color: #011328;
+}
+
+p {
+    border: 1px solid #484b4c;
+    color: #c3c3c3;
+}
+
+h3 {
+    color: #dfebeb;
+}
+
+h2 {
+    color: #dfebeb;
+}
+
+#atcFpl {
+    color: #c3c3c3;
+}
+
+#airportInformationTable td{
+    border: 1px solid #484b4c;
+    color: #275a8b;
+}
+
+#airportInformationTable th{
+    color: #dfebeb;
+}
+
+#airportInformationTable a{
+    color: #3baac6;
+}
+
+.custom-marker .marker-square {
+    border: 1px solid white;
+    background-color: black;
+}
+
+.custom-marker .heading-line {
+    background-color: white !important;
+}
+
+.custom-marker .marker-text {
+    color: #dfebeb;
+}
+
+.airacLabel{
+    color: rgb(179, 179, 179);
+}
+
+.flowLabel{
+    color: #dfebeb;
+}
+
+.hazard-marker {
+    color: #43c6e7	 !important;
+}
+
+a {
+    color: #43c6e7;
+}
+
+#closeContentWindow {
+    background-color: #fe5f57;
+    color: white;
+}
+
+button {
+    color: white;
+    background-color: #41826e;
+}
+
+#timeWindow {
+    background-color: #011328;
+    border: none;
+    color: #dfebeb;
+}
+
+#loadingScreen {
+    background-color: black;
+}
+
+.atc-text-marker {
+    color: rgb(179, 179, 179);
+}
+
+.aupNotification {
+    color: #dfebeb;
+}
+
+.alert-container {
+    background-color: black;
+    opacity: 0.9;
+    padding: 10px;
+    display: inline-block;
+}
+
+.custom-tooltip {
+    color: #dfebeb;
+}

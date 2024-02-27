@@ -7,6 +7,8 @@ let mainLines = [];
 let crossLines = [];
 var airwaysVisible = false;
 activeKmlNames = [];
+var airportMarkers = [];
+let currentTheme = localStorage.getItem('theme') || 'light'; 
 
 // EFJY CTA
 const now = new Date();
@@ -95,6 +97,7 @@ async function addKMLToMap(map) {
                 };
                 if (feature.properties.name && activeKmlNames.includes(feature.properties.name)) {
                     baseStyle.weight = 2.5;
+                    baseStyle.fillOpacity = 0.1;
                 }
                 return baseStyle;
             },
@@ -145,7 +148,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
     });  
     L.marker([67, 30.45], {icon: airacIcon}).addTo(map);
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    const tileLayerUrl = currentTheme === 'light' ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+
+    L.tileLayer(tileLayerUrl, {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
                      '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
                      'Imagery © <a href="https://carto.com/attributions">CartoDB</a>',
@@ -222,7 +227,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     fetch('/flow')
     .then(response => response.json())
     .then(data => {
-        const filteredData = data.filter(entry => entry.notified_flight_information_regions.includes(14));
+        const filteredData = data.filter(entry => entry.notified_flight_information_regions.includes(14)); // 14 = EFIN
         let textContent = '';
 
         filteredData.forEach(entry => {
@@ -246,13 +251,16 @@ document.addEventListener('DOMContentLoaded', (event) => {
             let reason = entry.reason;
 
             textContent += 
-            `⚠️ <b>${ident} | ${validityTime}</b><br>
-            ${measureType}: 
-            ${measureValue}<br>${filters}<br>
-            Reason: ${reason}<br><br>`;
+                `<div class="alert-container">
+                ⚠️ <b>${ident} | ${validityTime}</b><br>
+                ${measureType}: 
+                ${measureValue}<br>${filters}<br>
+                Reason: ${reason}<br><br>
+                </div>`
+            ;
         });
 
-        L.marker([59, 29.4122], { icon: L.divIcon({ className: 'flowLabel', html: textContent }) }).addTo(map);
+        L.marker([65, 33], { icon: L.divIcon({ className: 'flowLabel', html: textContent }) }).addTo(map);
     })
     .catch(error => console.error('Error fetching data:', error));
 
@@ -272,12 +280,12 @@ const kmlStyles = {
     "G": { color: "rgba(69, 130, 181, 0.6)", fillOpacity: 0, weight: 1, interactive: false },
     "C": { color: "rgba(56, 52, 148, 0.6)", fillOpacity: 0, weight: 1, interactive: false },
     "D": { color: "rgba(104, 45, 134, 0.6)", fillOpacity: 0, weight: 1, interactive: false },
-    "Danger": { color: "darkorange", fillColor: "darkorange", fillOpacity: "40%", weight: 1 },
+    "Danger": { color: "darkorange", fillColor: "darkorange", fillOpacity: "20%", weight: 1 },
     "TEMPO_D": { color: "darkorange", fillColor: "darkorange", fillOpacity: "20%", weight: 1, dashArray: "4 4" },
-    "Restricted": { color: "rgba(239, 8, 16, 0.6)", fillColor: "rgba(239, 8, 16, 0.4)", fillOpacity: "50%", weight: 1 },
-    "TEMPO_R": { color: "rgba(239, 8, 16, 0.6)", fillColor: "rgba(239, 8, 16, 0.4)", fillOpacity: "50%", weight: 1 },
-    "Prohibited": { color: "rgba(255, 0, 0, 0.6)", fillColor: "rgba(255, 0, 0, 0.4)", fillOpacity: "50%", weight: 1 },
-    "TEMPO_P": { color: "rgba(255, 0, 0, 0.6)", fillColor: "rgba(255, 0, 0, 0.4)", fillOpacity: "50%", weight: 1 },
+    "Restricted": { color: "rgba(239, 8, 16, 0.6)", fillColor: "rgba(239, 8, 16, 0.4)", fillOpacity: "20%", weight: 1 },
+    "TEMPO_R": { color: "rgba(239, 8, 16, 0.6)", fillColor: "rgba(239, 8, 16, 0.4)", fillOpacity: "20%", weight: 1 },
+    "Prohibited": { color: "rgba(255, 0, 0, 0.6)", fillColor: "rgba(255, 0, 0, 0.4)", fillOpacity: "20%", weight: 1 },
+    "TEMPO_P": { color: "rgba(255, 0, 0, 0.6)", fillColor: "rgba(255, 0, 0, 0.4)", fillOpacity: "20%", weight: 1 },
     "TSA": { color: "rgba(0, 85, 255, 0.4)", fillColor: "rgba(0, 85, 255, 0.4)", fillOpacity: "20%", weight: 1, dashArray: "4 4"},
     "TRA": { color: "rgba(0, 85, 255, 0.4)", fillColor: "rgba(0, 85, 255, 0.4)", fillOpacity: "20%", weight: 1, dashArray: "4 4"},
     "TEMPO_TSA": { color: "rgba(0, 85, 255, 0.4)", fillColor: "rgba(0, 85, 255, 0.4)", fillOpacity: "20%", weight: 1, dashArray: "4 4"},
@@ -548,7 +556,7 @@ document.addEventListener('DOMContentLoaded', function() {
         transparent: true,
         attribution: '© Finnish Meteorological Institute',
         _uniqueTime: new Date().getTime(),
-        opacity: 0.5,
+        opacity: 0.3,
         maxZoom: 9,
     }).addTo(map);
 
@@ -693,49 +701,8 @@ document.addEventListener('DOMContentLoaded', function() {
     updateTime();
     setInterval(updateTime, 1000);
 
-    // make airports
-    airports.forEach(function(airport) {
-        var customIcon = L.icon({
-            iconUrl: '/src/airport.png',
-            iconSize: [16, 16], // Adjust the size as needed
-            iconAnchor: [8, 8], // Adjust the anchor point if necessary
-            popupAnchor: [0, -10] // Adjust the popup anchor if necessary
-        });
-    
-        // Create marker with custom icon
-        var marker = L.marker(airport.coords, {
-            icon: customIcon
-        }).addTo(map);
-    
-        marker.bindTooltip(airport.icao, {
-            permanent: false,
-            className: 'custom-tooltip',
-            direction: 'top',
-            offset: L.point(10, 5)
-        });
-    
-        marker.on('click', function() {
-            loadAirportData(airport.icao);
-        });
-    
-        // Fetch pilot data from the /traffic endpoint
-        fetch('/traffic')
-        .then(response => response.json())
-        .then(data => {
-            // Check if any pilot is flying to or from this airport
-            var isAirportActive = data.some(pilot => pilot.flight_plan.departure === airport.icao || pilot.flight_plan.arrival === airport.icao);
-            
-            // If active, set the icon URL to activeAirport.png, otherwise set it back to airport.png
-            if (isAirportActive) {
-                customIcon.options.iconUrl = '/src/activeAirport.png';
-                marker.setIcon(customIcon);
-            } else {
-                customIcon.options.iconUrl = '/src/airport.png';
-                marker.setIcon(customIcon);
-            }
-        });
-    });
-    
+    loadAirportIcons();
+    setInterval(loadAirportIcons, 120000);
 
     // make runway extended centerlines
 
@@ -900,9 +867,10 @@ function calculateEndPoint(startCoord, heading, distanceNM) {
 function drawExtendedCenterline(startCoord, heading, distanceNM, map) {
     const startPoint = L.latLng(startCoord);
     const endPoint = L.latLng(calculateEndPoint(startCoord, heading, distanceNM)); // Reverse heading
+    const rwyColor = currentTheme === 'light' ? '#8a8a8a' : '#484b4c';
 
     // Draw main line
-    const mainLine = L.polyline([startPoint, endPoint], { color: '#8a8a8a', weight: 1 }).addTo(map);
+    const mainLine = L.polyline([startPoint, endPoint], { color: rwyColor, weight: 1 }).addTo(map);
     mainLines.push(mainLine);
 
     // Draw cross lines at each mile
@@ -913,8 +881,66 @@ function drawExtendedCenterline(startCoord, heading, distanceNM, map) {
         const midPoint = [(milePoint[0] + nextMilePoint[0]) / 2, (milePoint[1] + nextMilePoint[1]) / 2]; // Midpoint between two consecutive miles
         const crossLineStart = calculateEndPoint(midPoint, heading + 90, crossLineLength / 60); // Perpendicular to main line
         const crossLineEnd = calculateEndPoint(midPoint, heading + 90, -crossLineLength / 60); // Perpendicular to main line
-        const crossLine = L.polyline([crossLineStart, crossLineEnd], { color: '#8a8a8a', weight: 1 }).addTo(map);
+        const crossLine = L.polyline([crossLineStart, crossLineEnd], { color: rwyColor, weight: 1 }).addTo(map);
 
         crossLines.push(crossLine);
     }   
+}
+
+var airportIcon = L.icon({
+    iconUrl: '/src/arp.svg',
+    iconSize: [16, 16],
+    iconAnchor: [8, 8],
+    popupAnchor: [0, -10]
+});
+
+function loadAirportIcons() {
+    // Remove existing airport markers
+    airportMarkers.forEach(marker => {
+        map.removeLayer(marker);
+    });
+
+    airportMarkers = [];
+
+    // make airports
+    airports.forEach(function(airport) {
+        // Create icon
+        var airportMarker = L.marker(airport.coords, {
+            icon: airportIcon
+        }).addTo(map);
+
+        // create text (ICAO code)
+        airportMarker.bindTooltip(airport.icao, {
+            permanent: false,
+            className: 'custom-tooltip',
+            direction: 'top',
+            offset: L.point(10, 5)
+        });
+
+        // create click function
+        airportMarker.on('click', function() {
+            loadAirportData(airport.icao);
+        });
+
+        // Fetch pilot data from the /traffic endpoint
+        fetch('/traffic')
+        .then(response => response.json())
+        .then(data => {
+            // Check if any pilot is flying to or from this airport
+            var isAirportActive = data.some(pilot => pilot.flight_plan.departure === airport.icao || pilot.flight_plan.arrival === airport.icao);
+            
+            // If active, set the icon URL to activeAirport.png, otherwise set it back to airport.png
+            if (isAirportActive) {
+                airportIcon.options.iconUrl = '/src/arp-active.svg';
+                airportMarker.setIcon(airportIcon);
+            } else {
+                airportIcon.options.iconUrl = '/src/arp.svg';
+                airportMarker.setIcon(airportIcon);
+            }
+        });
+
+        // Add the marker to the array
+        airportMarkers.push(airportMarker);
+    });
+    console.log("Airport status loaded");
 }

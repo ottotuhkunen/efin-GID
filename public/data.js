@@ -16,7 +16,7 @@ const atcToKmlMapping = [
     
     [["EFKU_TWR", "EFKU__TWR"], ["EFKU CTR"], "KU TWR 120.15"],
     [["EFKU_APP", "EFKU__APP"], ["EFKU TMA"], "KU COR 130.6"],
-    [["EFKU_R_TWR", "EFKU_R__TWR"], ["EFKU TMA"], "KU TWR (+APS)<br>120.15"],
+    [["EFKU_R_TWR", "EFKU_R__TWR"], ["EFKU TMA", "EFKU CTR"], "KU TWR (+APS)<br>120.15"],
 
     [["EFOU_TWR", "EFOU__TWR"], ["EFOU CTR"], "OU TWR 124.4"],
     [["EFOU_APP", "EFOU__APP"], ["EFOU TMA", "EFOU CTR"], "OU COR 118.15"],
@@ -985,7 +985,22 @@ var airportInformation = [
         serviceType: [
             { description: "" }
         ]
-    }
+    },
+    { 
+        icao: "ENKR", 
+        depAndArrCharts: [
+            { name: "", url: "" },
+        ],
+        apchCharts: [
+            { name: "", url: "" }        
+        ],
+        otherData: [
+            { name: "LETTER OF AGREEMENT", url: "https://wiki.vatsim-scandinavia.org/attachments/22?open=true" }
+        ],
+        serviceType: [
+            { description: "Flights with destination ENKR and with cruising level above FL110 shall be given clearance to descend to FL110.<br><br>Traffic via COPs SIVNU, VADLA and ROVAN with destination ENKR, or transiting through the AoR of ENKR APP below FL105, shall be transferred to ENKR_APP frequency 120.350 MHz (secondary frequency ENRC_CTR, 118.325 MHz), unless otherwise advised by Polaris ACC.<br><br>Callsign for both ENKR_APP and ENRC_CTR is “Kirkenes Tower”.<br><br>Traffic with destination ENKR is released for descent at DME 50 NM from KIK." }
+        ]
+    },
 ];
 
 
@@ -1022,8 +1037,8 @@ var airports = [
     { name: "Stockholm Vesterås", icao: "ESOW", coords: [59.58944, 16.63361] },
     { name: "Umeå", icao: "ESNU", coords: [63.79167, 20.28278] },
     { name: "Luleå Kallax", icao: "ESPA", coords: [65.54361, 22.12194] },
-    { name: "Ämäri Air Base", icao: "EEEI", coords: [59.2622, 24.2083] 
-    }
+    { name: "Ämäri Air Base", icao: "EEEI", coords: [59.2622, 24.2083] },
+    { name: "Kirkenes / Høybuktmoen", icao: "ENKR", coords: [69.72611, 29.89111] }
 ];
 
 function aircraftData(cs) {
