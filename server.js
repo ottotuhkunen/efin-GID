@@ -10,7 +10,6 @@ const port = process.env.PORT || 4000;
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-
 app.use((req, res, next) => {
     if (req.header('x-forwarded-proto') !== 'https' && process.env.NODE_ENV === 'production') {
         res.redirect(`https://${req.header('host')}${req.url}`);
@@ -20,7 +19,6 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static('.'));
-
 
 app.listen(port, () => {
     console.log(`Server listening at ${port}`);
@@ -118,10 +116,10 @@ app.get('/traffic', async (req, res) => {
         const data = await response.json();
 
         const finlandBounds = {
-            north: 70.09,
-            south: 57.00,
-            west: 18.00,
-            east: 31.59
+            north: 71,
+            south: 58,
+            west: 18,
+            east: 32
         };
 
         const aircraftInFinland = data.pilots.filter(pilot => {

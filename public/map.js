@@ -341,15 +341,17 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .catch(error => console.error('Error loading the GeoJSON file:', error));
 
+    const fixColor = currentTheme === 'light' ? 'black' : '#c3c3c3';
+
     // Waypoint icons
     var vfrIcon = 'data:image/svg+xml;base64,' + btoa(`
-        <svg width="10" height="10" viewbox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
-        <path d="M 5 0 L 6.5 2 L 8.5 4 L 10 10 L 0 10 L 1.5 4 L 3.5 2 Z" fill="none" stroke="black" stroke-width="1.5" />
+        <svg width="10" height="10" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
+        <path d="M 5 0 L 6.5 2 L 8.5 4 L 10 10 L 0 10 L 1.5 4 L 3.5 2 Z" fill="none" stroke="${fixColor}" stroke-width="1.5" />
         </svg>
     `);
     var ifrIcon = 'data:image/svg+xml;base64,' + btoa(`
         <svg width="30" height="30" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
-        <path d="M 0 0 L 10 0 L 8.5 6 L 5 10 L 1.5 6 L 0 0 Z" fill="none" stroke="black" stroke-width="1.5" />
+        <path d="M 0 0 L 10 0 L 8.5 6 L 5 10 L 1.5 6 L 0 0 Z" fill="none" stroke="${fixColor}" stroke-width="1.5" />
         </svg>
     `);
 
@@ -463,20 +465,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         
                 var color, dashArray;
+                const airwayColor = currentTheme === 'light' ? 'black' : '#484b4c';
+                const depRouteColor = currentTheme === 'light' ? '#298cff' : '#164c8a';
+                const arrRouteColor = currentTheme === 'light' ? 'orange' : '#8a4616';
+
                 if (airway.type === "EFHK DEP | PERM") {
-                    color = "#298cff";
+                    color = depRouteColor;
                     weight = 2;
                     dashArray = null;
                 } else if (airway.type === "EFHK ARR | PERM") {
-                    color = "orange";
+                    color = arrRouteColor;
                     weight = 2;
                     dashArray = null;
                 } else if (airway.type === "CDR 1 H24") {
-                    color = "black";
+                    color = airwayColor;
                     weight = 1;
                     dashArray = "4, 4";
                 } else {
-                    color = "black";
+                    color = airwayColor;
                     weight = 1;
                     dashArray = null;
                 }
@@ -614,7 +620,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // add ACC Sectors to map
     sectorCoordinates.forEach(sector => {
         const polyline = L.polyline(sector, {
-            color: '#476c00',
+            color: 'darkGreen',
             dashArray: '10 5 5 5',
             weight: 1
         });
@@ -808,6 +814,9 @@ function convertToLatLng(dmsLat, dmsLng) {
 }
 
   function drawSigmetsForFIRs(sigmets, firIds) {
+    sigmetLayers.forEach(layer => {
+        map.removeLayer(layer);
+    });
     sigmetLayers = [];
     sigmets.forEach(sigmet => {
       if (!firIds.includes(sigmet.firId)) return;
@@ -816,7 +825,7 @@ function convertToLatLng(dmsLat, dmsLng) {
         color: 'rgb(0, 128, 255)',
         fillColor: 'rgb(0, 128, 255)',
         fillOpacity: 0.1,
-        weight: 2,
+        weight: 1,
       }).bindPopup(sigmet.rawSigmet);
       sigmetLayers.push(polygon.addTo(map));
       const center = polygon.getBounds().getCenter();
