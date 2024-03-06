@@ -9,6 +9,9 @@ var airwaysVisible = false;
 activeKmlNames = [];
 var airportMarkers = [];
 let currentTheme = localStorage.getItem('theme') || 'light'; 
+var standLayer = L.layerGroup();
+var baseLayer;
+let finlandOverlay;
 
 // EFJY CTA
 const now = new Date();
@@ -132,7 +135,7 @@ async function addKMLToMap(map) {
         document.getElementById('loadingScreen').style.display = "none";
         document.getElementById('airspaceButton').disabled = false;
     }
-    console.log("Airspace and ATC activity loaded");    
+    console.log("Airspace and ATC activity loaded");
 }
 
 
@@ -150,13 +153,14 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     const tileLayerUrl = currentTheme === 'light' ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
 
-    L.tileLayer(tileLayerUrl, {
+    baseLayer = L.tileLayer(tileLayerUrl, {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
                      '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
                      'Imagery © <a href="https://carto.com/attributions">CartoDB</a>',
         subdomains: 'abcd',
         maxZoom: 19
-    }).addTo(map);
+    });
+    baseLayer.addTo(map);
 
     // load airspaces and ATC activity
     addKMLToMap(map);
@@ -211,6 +215,24 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     updateAircraftPositions();
     setInterval(updateAircraftPositions, 20000);
+
+    // add stands and taxiways
+    addStandsToMap();
+    addGroundMaps();
+
+
+    map.on('zoomend', function () {
+        var zoomLevel = map.getZoom();
+        if (zoomLevel >= 12) {
+          document.querySelectorAll('.stand-label').forEach(label => {
+            label.style.display = 'block';
+          });
+        } else {
+          document.querySelectorAll('.stand-label').forEach(label => {
+            label.style.display = 'none';
+          });
+        }
+      });
     
     // Close data window
     var closeButton = document.getElementById("closeContentWindow");
@@ -221,9 +243,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
         });
     }
 
-    // add ground maps (ADC - aerodrome charts)
-    addPdfOverlays();
-    
     fetch('/flow')
     .then(response => response.json())
     .then(data => {
@@ -545,6 +564,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 layer.getTooltip().setOpacity(0);
             }
         });
+
     }
 
     map.on('zoomend', function() {
@@ -803,15 +823,19 @@ function dmsToDecimal(degrees, minutes, seconds, direction) {
 
 function convertToLatLng(dmsLat, dmsLng) {
     // Extract parts of the DMS coordinates
-    var latParts = dmsLat.match(/(\d{2})(\d{2})(\d{2})([NS])/);
-    var lngParts = dmsLng.match(/(\d{3})(\d{2})(\d{2})([EW])/);
+    var latParts = dmsLat.match(/(\d+)(\d{2})(\d{2})(\.\d+)?([NS])/);
+    var lngParts = dmsLng.match(/(\d+)(\d{2})(\d{2})(\.\d+)?([EW])/);
 
     // Convert DMS to decimal
-    var lat = dmsToDecimal(latParts[1], latParts[2], latParts[3], latParts[4]);
-    var lng = dmsToDecimal(lngParts[1], lngParts[2], lngParts[3], lngParts[4]);
+    var lat = parseInt(latParts[1], 10) + parseInt(latParts[2], 10) / 60 + parseInt(latParts[3], 10) / 3600;
+    lat = lat * (latParts[5] === 'S' ? -1 : 1);
 
-    return [lat, lng];
+    var lng = parseInt(lngParts[1], 10) + parseInt(lngParts[2], 10) / 60 + parseInt(lngParts[3], 10) / 3600;
+    lng = lng * (lngParts[5] === 'W' ? -1 : 1);
+
+    return [lat.toFixed(6), lng.toFixed(6)]; // Return latitude and longitude as strings
 }
+
 
   function drawSigmetsForFIRs(sigmets, firIds) {
     sigmetLayers.forEach(layer => {

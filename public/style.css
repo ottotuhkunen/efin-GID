@@ -223,3 +223,47 @@ button {
     font-size: 7pt;
     line-height: 7pt;
 }
+
+.stand-icon {
+    background-color: black;
+    border: 1px solid rgb(221, 166, 17);
+    border-radius: 4px;
+    text-align: center;
+    line-height: 14px;
+    color: rgb(221, 166, 17);;
+    height: 20px;
+    display: none;
+}
+
+.stand-label {
+    font-size: 7pt;
+}
+
+.runway-label-icon {
+    background-color: #2538AD;
+    border: 1px solid white;
+    border-radius: 50%;
+    text-align: center;
+    color: white;
+}
+
+.runway-label {
+    font-size: 10pt;
+    line-height: 30px;
+    margin-top: 50%;
+    transform: translateY(-50%);
+}
+
+.taxiway-icon {
+    display: none;
+    font-size: 9pt;
+    color: white;
+    font-weight: bold;
+    text-shadow: 
+        -1px -1px 0 black,  
+         1px -1px 0 black,
+        -1px  1px 0 black,
+         1px  1px 0 black;
+    white-space: nowrap;
+    text-align: center; 
+}

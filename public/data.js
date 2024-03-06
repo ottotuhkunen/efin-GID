@@ -1111,28 +1111,6 @@ const pdfOverlays = [
     }
 ];
 
-function addPdfOverlays() {
-    pdfOverlays.forEach(overlay => {
-        const imageOverlay = L.imageOverlay(overlay.url, overlay.bounds, {
-            interactive: false
-        });
-
-        function addOverlayIfNeeded() {
-            const zoomLevel = map.getZoom();
-            const mapBounds = map.getBounds();
-            const overlayBounds = L.latLngBounds(overlay.bounds);
-
-            if (zoomLevel >= 12 && mapBounds.intersects(overlayBounds)) {
-                imageOverlay.addTo(map).bringToBack();
-            } else {
-                map.removeLayer(imageOverlay);
-            }
-        }
-
-        map.on('zoomend', addOverlayIfNeeded);
-        addOverlayIfNeeded();
-    });
-}
 
 var airways = [
     { 
